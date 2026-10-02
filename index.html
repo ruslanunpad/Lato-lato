@@ -5,24 +5,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Virtual Lab: Lato-Lato — GHS & Tumbukan</title>
 
-<!-- MathJax (SVG output) -->
 <script>
 window.MathJax = {
-  tex: {
-    inlineMath: [['$','$'], ['\\(','\\)']],
-    displayMath: [['$$','$$'], ['\\[','\\]']]
-  },
+  tex: { inlineMath: [['$','$'], ['\\(','\\)']], displayMath: [['$$','$$'], ['\\[','\\]']] },
   svg: { fontCache: 'global' },
-  options: {
-    ignoreHtmlClass: 'mathjax_ignore',
-    processHtmlClass: 'mathjax_process'
-  },
+  options: { ignoreHtmlClass: 'mathjax_ignore', processHtmlClass: 'mathjax_process' },
   startup: { typeset: true }
 };
 </script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-
-<!-- p5.js, html2pdf, FileSaver -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -32,555 +23,227 @@ window.MathJax = {
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
-/* ============ TOKENS ============ */
 :root{
-  --bg:#0b0e14;
-  --bg-elev:#10141d;
-  --panel:#151a26;
-  --panel-2:#1c2231;
-  --panel-3:#232a3d;
-  --line:#2a3145;
-  --line-2:#384159;
-  --ink:#eef1f7;
-  --ink-2:#c3cad8;
-  --dim:#8b93a7;
-  --mute:#5f6779;
-
-  --red:#ef4444;
-  --red-2:#dc2626;
-  --amber:#f5b301;
-  --amber-2:#f59e0b;
-  --teal:#14b8a6;
-  --teal-2:#0d9488;
-  --blue:#3b82f6;
-  --purple:#a78bfa;
-
+  --bg:#0b0e14; --bg-elev:#10141d; --panel:#151a26; --panel-2:#1c2231; --panel-3:#232a3d;
+  --line:#2a3145; --line-2:#384159; --ink:#eef1f7; --ink-2:#c3cad8; --dim:#8b93a7; --mute:#5f6779;
+  --red:#ef4444; --amber:#f5b301; --teal:#14b8a6; --teal-2:#0d9488; --blue:#3b82f6; --purple:#a78bfa;
   --grad-teal: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
   --grad-amber: linear-gradient(135deg, #f5b301 0%, #d97706 100%);
   --grad-panel: linear-gradient(180deg, #1a1f2e 0%, #141824 100%);
-
   --shadow-sm: 0 1px 2px rgba(0,0,0,.4);
   --shadow-md: 0 8px 24px rgba(0,0,0,.35);
   --shadow-lg: 0 16px 48px rgba(0,0,0,.5);
-
-  --radius-sm: 8px;
-  --radius: 12px;
-  --radius-lg: 16px;
-
+  --radius: 12px; --radius-lg: 16px;
   --font: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
 }
-
-/* ============ BASE ============ */
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
 body{
   margin:0;
-  background:
-    radial-gradient(1200px 600px at 15% -10%, rgba(20,184,166,.08), transparent 60%),
-    radial-gradient(900px 500px at 90% 0%, rgba(245,179,1,.06), transparent 55%),
-    var(--bg);
-  color:var(--ink);
-  font-family:var(--font);
-  font-size:15px;
-  line-height:1.6;
-  min-height:100vh;
+  background: radial-gradient(1200px 600px at 15% -10%, rgba(20,184,166,.08), transparent 60%),
+              radial-gradient(900px 500px at 90% 0%, rgba(245,179,1,.06), transparent 55%), var(--bg);
+  color:var(--ink); font-family:var(--font); font-size:15px; line-height:1.6; min-height:100vh;
   padding-bottom:env(safe-area-inset-bottom,20px);
-  -webkit-font-smoothing:antialiased;
-  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
 }
 img,svg,canvas{max-width:100%;display:block;}
 button{font-family:inherit;}
 a{color:var(--teal);text-decoration:none;}
 a:hover{text-decoration:underline;}
-
 ::selection{background:rgba(20,184,166,.35);color:#fff;}
 ::-webkit-scrollbar{width:10px;height:10px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--line-2);border-radius:8px;}
 ::-webkit-scrollbar-thumb:hover{background:var(--teal-2);}
-
 .wrap{max-width:1120px;margin:0 auto;padding:0 20px;}
 
-/* ============ HEADER ============ */
-header.site{
-  position:sticky; top:0; z-index:40;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background:rgba(11,14,20,.72);
-  border-bottom:1px solid rgba(42,49,69,.7);
-}
-.header-inner{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:18px; padding:14px 0;
-}
-.brand{
-  display:flex; align-items:center; gap:11px;
-  font-weight:800; letter-spacing:-.01em;
-  color:var(--ink); text-decoration:none;
-  white-space:nowrap;
-}
+header.site{position:sticky; top:0; z-index:40; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  background:rgba(11,14,20,.72); border-bottom:1px solid rgba(42,49,69,.7);}
+.header-inner{display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 0;}
+.brand{display:flex; align-items:center; gap:11px; font-weight:800; letter-spacing:-.01em; color:var(--ink); text-decoration:none; white-space:nowrap;}
 .brand:hover{text-decoration:none;}
-.brand .logo{
-  width:38px; height:38px; border-radius:11px;
-  background:var(--grad-amber);
-  display:grid; place-items:center;
-  font-size:19px;
-  box-shadow: 0 6px 18px rgba(245,179,1,.28);
-}
+.brand .logo{width:38px;height:38px;border-radius:11px;background:var(--grad-amber);display:grid;place-items:center;font-size:19px;box-shadow: 0 6px 18px rgba(245,179,1,.28);}
 .brand .title{font-size:15.5px;}
 .brand .sub{font-size:11px; color:var(--dim); font-weight:600; margin-top:1px;}
 
-/* ============ TABS ============ */
-.tabs{
-  display:flex; gap:4px; padding:5px;
-  background:var(--panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  overflow-x:auto;
-  scrollbar-width:none;
-}
+.tabs{display:flex; gap:4px; padding:5px; background:var(--panel); border:1px solid var(--line); border-radius:var(--radius); overflow-x:auto; scrollbar-width:none;}
 .tabs::-webkit-scrollbar{display:none;}
-.tab-btn{
-  display:inline-flex; align-items:center; gap:7px;
-  font-weight:700; font-size:13px;
-  padding:9px 15px; border:none; border-radius:9px;
-  background:transparent; color:var(--dim);
-  cursor:pointer; white-space:nowrap;
-  transition: all .18s ease;
-}
+.tab-btn{display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:13px; padding:9px 15px;
+  border:none; border-radius:9px; background:transparent; color:var(--dim); cursor:pointer; white-space:nowrap; transition: all .18s ease;}
 .tab-btn:hover{color:var(--ink);background:rgba(255,255,255,.03);}
-.tab-btn.active{
-  color:#04211c;
-  background:var(--grad-teal);
-  box-shadow: 0 4px 14px rgba(20,184,166,.28);
-}
+.tab-btn.active{color:#04211c; background:var(--grad-teal); box-shadow: 0 4px 14px rgba(20,184,166,.28);}
 .tab-btn .ic{font-size:14px;}
 
-/* ============ MAIN / SECTIONS ============ */
 main{padding:32px 0 60px;}
 section.tab{display:none;}
 section.tab.active{display:block; animation: fadeUp .35s cubic-bezier(.2,.8,.2,1);}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
 
 .page-head{margin-bottom:26px;}
-.eyebrow{
-  display:inline-block;
-  font-size:11px; font-weight:700;
-  letter-spacing:.12em; text-transform:uppercase;
-  color:var(--teal);
-  padding:5px 11px;
-  background:rgba(20,184,166,.08);
-  border:1px solid rgba(20,184,166,.22);
-  border-radius:999px;
-  margin-bottom:12px;
-}
+.eyebrow{display:inline-block; font-size:11px; font-weight:700; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--teal); padding:5px 11px; background:rgba(20,184,166,.08); border:1px solid rgba(20,184,166,.22);
+  border-radius:999px; margin-bottom:12px;}
 h1{font-size:30px; line-height:1.15; font-weight:800; letter-spacing:-.02em; margin:0 0 8px;}
 h2{font-size:18px; font-weight:800; letter-spacing:-.01em; margin:26px 0 12px; color:var(--ink);}
 h2:first-child{margin-top:0;}
-h2 .num{
-  display:inline-grid; place-items:center;
-  width:26px;height:26px;border-radius:8px;
-  background:rgba(20,184,166,.12);
-  color:var(--teal); font-size:12px; font-weight:800;
-  margin-right:9px; vertical-align:middle;
-  border:1px solid rgba(20,184,166,.25);
-}
+h2 .num{display:inline-grid; place-items:center; width:26px;height:26px;border-radius:8px;
+  background:rgba(20,184,166,.12); color:var(--teal); font-size:12px; font-weight:800;
+  margin-right:9px; vertical-align:middle; border:1px solid rgba(20,184,166,.25);}
 h3{font-size:15px; font-weight:700; margin:20px 0 8px; color:var(--ink-2);}
 p{color:var(--ink-2); margin:0 0 12px;}
 .lede{color:var(--dim); font-size:14.5px; line-height:1.7; max-width:720px; margin:0;}
 
-/* ============ PANEL / CARDS ============ */
-.card{
-  background:var(--grad-panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius-lg);
-  padding:24px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom:20px;
-}
-.card-tight{padding:18px;}
+.card{background:var(--grad-panel); border:1px solid var(--line); border-radius:var(--radius-lg);
+  padding:24px; box-shadow: var(--shadow-sm); margin-bottom:20px;}
 
-/* ============ THEORY ============ */
-.theory .card + .card{margin-top:16px;}
-.formula{
-  background: linear-gradient(180deg, rgba(20,184,166,.05), rgba(20,184,166,.02));
-  border:1px solid rgba(20,184,166,.22);
-  border-left:3px solid var(--teal);
-  border-radius:10px;
-  padding:16px 20px;
-  margin:14px 0;
-  overflow-x:auto;
-  text-align:center;
-}
+.formula{background: linear-gradient(180deg, rgba(20,184,166,.05), rgba(20,184,166,.02));
+  border:1px solid rgba(20,184,166,.22); border-left:3px solid var(--teal); border-radius:10px;
+  padding:16px 20px; margin:14px 0; overflow-x:auto; text-align:center;}
 .formula mjx-container{color:var(--ink) !important;}
-
-.callout{
-  display:flex; gap:12px; align-items:flex-start;
-  background:rgba(245,179,1,.06);
-  border:1px solid rgba(245,179,1,.22);
-  border-radius:10px;
-  padding:13px 16px;
-  margin:14px 0;
-}
+.callout{display:flex; gap:12px; align-items:flex-start; background:rgba(245,179,1,.06);
+  border:1px solid rgba(245,179,1,.22); border-radius:10px; padding:13px 16px; margin:14px 0;}
 .callout .ic{font-size:18px; line-height:1; flex-shrink:0; margin-top:1px;}
 .callout p{color:var(--ink-2); font-size:13.5px; margin:0; line-height:1.65;}
-.callout p + p{margin-top:6px;}
-
-.svg-figure{
-  background:
-    radial-gradient(600px 300px at 50% 0%, rgba(20,184,166,.05), transparent 70%),
-    var(--bg-elev);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:16px 12px 10px;
-  margin:18px 0;
-  overflow:hidden;
-}
+.svg-figure{background: radial-gradient(600px 300px at 50% 0%, rgba(20,184,166,.05), transparent 70%), var(--bg-elev);
+  border:1px solid var(--line); border-radius:var(--radius); padding:16px 12px 10px; margin:18px 0; overflow:hidden;}
 .svg-figure svg{display:block; width:100%; height:auto; max-width:640px; margin:0 auto;}
-.svg-figure figcaption{
-  font-size:11.5px; color:var(--dim); text-align:center;
-  font-style:italic; margin-top:10px; line-height:1.55;
-  padding:0 12px;
-}
+.svg-figure figcaption{font-size:11.5px; color:var(--dim); text-align:center; font-style:italic; margin-top:10px; line-height:1.55; padding:0 12px;}
 
-/* ============ LAB LAYOUT ============ */
-.lab-grid{
-  display:grid;
-  grid-template-columns: minmax(0,1fr) 340px;
-  gap:18px;
-  align-items:start;
-}
+.lab-grid{display:grid; grid-template-columns: minmax(0,1fr) 340px; gap:18px; align-items:start;}
 .stage-card{display:flex; flex-direction:column; gap:14px; align-items:center;}
-.stage-card #canvasHolder{display:flex; justify-content:center;}
-.stage-card canvas{border-radius:12px; box-shadow: var(--shadow-md);}
-
+.stage-card #canvasHolder{display:flex; justify-content:center; width:100%;}
+.stage-card canvas{border-radius:12px; box-shadow: var(--shadow-md); max-width:100%; height:auto;}
 .controls-row{display:flex; gap:10px; flex-wrap:wrap; justify-content:center;}
-.btn{
-  display:inline-flex; align-items:center; gap:7px;
-  font-weight:700; font-size:13.5px;
-  padding:10px 18px; border-radius:10px;
-  border:1px solid var(--line);
-  background:var(--panel-2); color:var(--ink);
-  cursor:pointer;
-  transition: all .18s ease;
-  box-shadow: var(--shadow-sm);
-}
+.btn{display:inline-flex; align-items:center; gap:7px; font-weight:700; font-size:13.5px;
+  padding:10px 18px; border-radius:10px; border:1px solid var(--line); background:var(--panel-2); color:var(--ink);
+  cursor:pointer; transition: all .18s ease; box-shadow: var(--shadow-sm);}
 .btn:hover{background:var(--panel-3); border-color:var(--line-2); transform: translateY(-1px);}
 .btn:active{transform: translateY(0) scale(.98);}
-.btn-primary{
-  background:var(--grad-teal); color:#04211c;
-  border-color:transparent;
-  box-shadow: 0 6px 20px rgba(20,184,166,.28);
-}
+.btn-primary{background:var(--grad-teal); color:#04211c; border-color:transparent; box-shadow: 0 6px 20px rgba(20,184,166,.28);}
 .btn-primary:hover{filter:brightness(1.08); background:var(--grad-teal);}
-.btn-push{
-  background:var(--grad-amber); color:#2b1c00;
-  border-color:transparent;
-  box-shadow: 0 6px 20px rgba(245,179,1,.25);
-}
+.btn-push{background:var(--grad-amber); color:#2b1c00; border-color:transparent; box-shadow: 0 6px 20px rgba(245,179,1,.25);}
 .btn-push:hover{filter:brightness(1.06); background:var(--grad-amber);}
 
-.readout-grid{
-  display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
-  width:100%;
-}
-.readout{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-radius:10px;
-  padding:10px 12px;
-  transition: border-color .2s;
-}
-.readout .lbl{
-  font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--mute); margin-bottom:3px; display:block;
-}
-.readout .val{
-  font-family:var(--mono); font-size:16px; font-weight:600;
-  color:var(--teal); line-height:1;
-}
+.readout-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:8px; width:100%;}
+.readout{background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:10px 12px; transition: border-color .2s;}
+.readout .lbl{font-size:9.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--mute); margin-bottom:3px; display:block;}
+.readout .val{font-family:var(--mono); font-size:16px; font-weight:600; color:var(--teal); line-height:1;}
 .readout .unit{font-size:10px; color:var(--dim); font-weight:600; margin-left:2px;}
 .readout.r-red{border-color: rgba(239,68,68,.25);}
 .readout.r-red .val{color:#f87171;}
 .readout.r-amber{border-color: rgba(245,179,1,.25);}
 .readout.r-amber .val{color:#fbbf24;}
 
-/* Side controls */
 .side-card{position:sticky; top:86px;}
 .side-block{margin-bottom:18px;}
 .side-block:last-child{margin-bottom:0;}
-.block-title{
-  display:flex; align-items:center; gap:8px;
-  font-weight:800; font-size:12.5px;
-  margin:0 0 12px; color:var(--ink);
-  letter-spacing:.01em;
-}
+.block-title{display:flex; align-items:center; gap:8px; font-weight:800; font-size:12.5px; margin:0 0 12px; color:var(--ink);}
 .dot{width:10px;height:10px;border-radius:50%;display:inline-block;flex-shrink:0;}
 .dot-red{background:var(--red); box-shadow:0 0 12px rgba(239,68,68,.6);}
 .dot-amber{background:var(--amber); box-shadow:0 0 12px rgba(245,179,1,.6);}
 
 .slider{display:block; margin-bottom:13px;}
-.slider .head{
-  display:flex; justify-content:space-between; align-items:baseline;
-  font-size:11.5px; font-weight:600; color:var(--dim); margin-bottom:6px;
-}
-.slider .val{
-  font-family:var(--mono); font-weight:600; font-size:12.5px; color:var(--teal);
-}
-.slider input[type=range]{
-  width:100%; height:5px; -webkit-appearance:none; appearance:none;
-  background:var(--panel-3); border-radius:99px; outline:none;
-}
-.slider input[type=range]::-webkit-slider-thumb{
-  -webkit-appearance:none; appearance:none;
-  width:16px; height:16px; border-radius:50%;
-  background:var(--teal); cursor:pointer;
-  border:2px solid var(--bg);
-  box-shadow: 0 0 0 3px rgba(20,184,166,.2);
-  transition: transform .15s;
-}
+.slider .head{display:flex; justify-content:space-between; align-items:baseline; font-size:11.5px; font-weight:600; color:var(--dim); margin-bottom:6px;}
+.slider .val{font-family:var(--mono); font-weight:600; font-size:12.5px; color:var(--teal);}
+.slider input[type=range]{width:100%; height:5px; -webkit-appearance:none; appearance:none; background:var(--panel-3); border-radius:99px; outline:none;}
+.slider input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; appearance:none; width:16px;height:16px;border-radius:50%;
+  background:var(--teal); cursor:pointer; border:2px solid var(--bg); box-shadow: 0 0 0 3px rgba(20,184,166,.2); transition: transform .15s;}
 .slider input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
-.slider input[type=range]::-moz-range-thumb{
-  width:14px;height:14px;border-radius:50%;background:var(--teal);
-  border:2px solid var(--bg); cursor:pointer;
-}
+.slider input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:var(--teal); border:2px solid var(--bg); cursor:pointer;}
+.select-box{width:100%; background:var(--panel-2); color:var(--ink); border:1px solid var(--line); border-radius:9px;
+  padding:9px 11px; font-family:var(--font); font-weight:600; font-size:12.5px; cursor:pointer;}
 
-.select-box{
-  width:100%; background:var(--panel-2); color:var(--ink);
-  border:1px solid var(--line); border-radius:9px;
-  padding:9px 11px; font-family:var(--font); font-weight:600; font-size:12.5px;
-  cursor:pointer;
-}
+.vec-options{display:flex; flex-direction:column; gap:8px;}
+.vec-options label{display:flex; align-items:center; gap:9px; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:9px; padding:9px 12px; font-size:12px; font-weight:600; color:var(--ink-2); cursor:pointer; transition: all .15s;}
+.vec-options label:hover{border-color:var(--line-2);}
+.vec-options input[type=checkbox]{accent-color:var(--teal); width:16px; height:16px; cursor:pointer;}
+.vec-options label:has(input:checked){background: rgba(20,184,166,.08); border-color: rgba(20,184,166,.4); color:var(--ink);}
 
-/* Graphs */
+.vec-legend{display:none; gap:14px; flex-wrap:wrap; justify-content:center; margin-top:8px; font-size:11px; color:var(--dim);}
+.vec-legend.show{display:flex;}
+.vec-legend span{display:flex; align-items:center; gap:5px; font-weight:600;}
+.vec-legend .sw{width:16px; height:3px; border-radius:2px; display:inline-block;}
+
 .graph-card{margin-top:20px;}
 .graph-card h2{margin-top:0;}
-.graph-canvas{
-  width:100%; background:var(--panel-2);
-  border:1px solid var(--line); border-radius:10px;
-  margin-top:10px; display:block;
-}
+.graph-canvas{width:100%; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; margin-top:10px; display:block;}
 
-/* Log */
 .log-list{display:flex; flex-direction:column; gap:6px; max-height:260px; overflow-y:auto;}
-.log-item{
-  background:var(--panel-2);
-  border:1px solid var(--line);
-  border-left:3px solid var(--teal);
-  border-radius:8px;
-  padding:9px 13px;
-  font-size:11.5px; font-family:var(--mono);
-  color:var(--ink-2);
-  line-height:1.5;
-}
+.log-item{background:var(--panel-2); border:1px solid var(--line); border-left:3px solid var(--teal); border-radius:8px;
+  padding:9px 13px; font-size:11.5px; font-family:var(--mono); color:var(--ink-2); line-height:1.5;}
 .log-item b{color:var(--teal); font-weight:700;}
 .log-empty{font-size:13px; color:var(--dim); font-style:italic; padding:14px; text-align:center;}
 
-/* ============ QUIZ ============ */
-.quiz-item{
-  background:var(--grad-panel);
-  border:1px solid var(--line);
-  border-radius:var(--radius);
-  padding:18px 20px;
-  margin-bottom:12px;
-  transition: border-color .2s;
-}
+.quiz-item{background:var(--grad-panel); border:1px solid var(--line); border-radius:var(--radius);
+  padding:18px 20px; margin-bottom:12px; transition: border-color .2s;}
 .quiz-item:hover{border-color:var(--line-2);}
-.quiz-q{
-  font-weight:700; font-size:14.5px; margin-bottom:12px;
-  line-height:1.55; color:var(--ink);
-  display:flex; gap:10px; align-items:flex-start;
-}
-.quiz-num{
-  display:inline-grid; place-items:center;
-  width:24px; height:24px; border-radius:7px;
-  background:rgba(20,184,166,.12);
-  color:var(--teal); font-size:11.5px; font-weight:800;
-  flex-shrink:0; margin-top:1px;
-  border:1px solid rgba(20,184,166,.25);
-}
+.quiz-q{font-weight:700; font-size:14.5px; margin-bottom:12px; line-height:1.55; color:var(--ink); display:flex; gap:10px; align-items:flex-start;}
+.quiz-num{display:inline-grid; place-items:center; width:24px;height:24px;border-radius:7px;
+  background:rgba(20,184,166,.12); color:var(--teal); font-size:11.5px; font-weight:800;
+  flex-shrink:0; margin-top:1px; border:1px solid rgba(20,184,166,.25);}
 .quiz-opts{display:flex; flex-direction:column; gap:7px;}
-.quiz-opt{
-  text-align:left; background:var(--panel-2);
-  border:1px solid var(--line);
-  color:var(--ink-2);
-  border-radius:9px; padding:11px 14px;
-  font-family:var(--font); font-size:13px; font-weight:500;
-  cursor:pointer; transition: all .16s ease;
-  display:flex; gap:10px; align-items:flex-start;
-}
+.quiz-opt{text-align:left; background:var(--panel-2); border:1px solid var(--line); color:var(--ink-2);
+  border-radius:9px; padding:11px 14px; font-family:var(--font); font-size:13px; font-weight:500;
+  cursor:pointer; transition: all .16s ease; display:flex; gap:10px; align-items:flex-start;}
 .quiz-opt:hover:not(:disabled){border-color:var(--teal-2); background:var(--panel-3); color:var(--ink);}
-.quiz-opt .opt-letter{
-  font-weight:800; color:var(--dim); flex-shrink:0;
-  width:16px; font-family:var(--mono); font-size:12px;
-  margin-top:1px;
-}
+.quiz-opt .opt-letter{font-weight:800; color:var(--dim); flex-shrink:0; width:16px; font-family:var(--mono); font-size:12px; margin-top:1px;}
 .quiz-opt:disabled{cursor:default;}
-.quiz-opt.correct{
-  border-color:var(--teal); background:rgba(20,184,166,.1);
-  color:#5eead4; font-weight:600;
-}
+.quiz-opt.correct{border-color:var(--teal); background:rgba(20,184,166,.1); color:#5eead4; font-weight:600;}
 .quiz-opt.correct .opt-letter{color:var(--teal);}
-.quiz-opt.wrong{
-  border-color:var(--red); background:rgba(239,68,68,.1);
-  color:#fca5a5;
-}
+.quiz-opt.wrong{border-color:var(--red); background:rgba(239,68,68,.1); color:#fca5a5;}
 .quiz-opt.wrong .opt-letter{color:var(--red);}
-.quiz-exp{
-  display:none; font-size:12.5px; color:var(--ink-2);
-  margin-top:12px; padding-top:12px;
-  border-top:1px dashed var(--line-2);
-  line-height:1.65;
-}
+.quiz-exp{display:none; font-size:12.5px; color:var(--ink-2); margin-top:12px; padding-top:12px; border-top:1px dashed var(--line-2); line-height:1.65;}
 .quiz-exp b{color:var(--teal);}
 .quiz-exp .ic{color:var(--teal); margin-right:4px;}
 
-/* ============ LKPD ============ */
-.lkpd-form{
-  display:grid; grid-template-columns:1fr 1fr; gap:14px;
-}
+.lkpd-form{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
 .field{display:flex; flex-direction:column; gap:6px;}
 .field.full{grid-column:1/-1;}
-.field label{
-  font-size:11.5px; font-weight:700;
-  color:var(--dim); letter-spacing:.02em;
-}
-.field input, .field textarea, .field select{
-  background:var(--panel-2); color:var(--ink);
-  border:1px solid var(--line); border-radius:9px;
-  padding:10px 13px; font-family:var(--font);
-  font-size:13px; font-weight:500;
-  transition: border-color .15s, box-shadow .15s;
-}
-.field input:focus, .field textarea:focus{
-  outline:none; border-color:var(--teal);
-  box-shadow: 0 0 0 3px rgba(20,184,166,.15);
-}
+.field label{font-size:11.5px; font-weight:700; color:var(--dim);}
+.field input, .field textarea, .field select{background:var(--panel-2); color:var(--ink); border:1px solid var(--line);
+  border-radius:9px; padding:10px 13px; font-family:var(--font); font-size:13px; font-weight:500; transition: border-color .15s, box-shadow .15s;}
+.field input:focus, .field textarea:focus{outline:none; border-color:var(--teal); box-shadow: 0 0 0 3px rgba(20,184,166,.15);}
 .field textarea{min-height:80px; resize:vertical; font-family:var(--font); line-height:1.55;}
-
-.check-group{
-  display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr));
-  gap:8px; margin:16px 0;
-}
-.check-group label{
-  display:flex; align-items:center; gap:9px;
-  background:var(--panel-2); border:1px solid var(--line);
-  border-radius:9px; padding:10px 13px;
-  font-size:12.5px; font-weight:600; color:var(--ink-2);
-  cursor:pointer; transition: all .15s;
-}
+.check-group{display:grid; grid-template-columns:repeat(auto-fill, minmax(180px,1fr)); gap:8px; margin:16px 0;}
+.check-group label{display:flex; align-items:center; gap:9px; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:9px; padding:10px 13px; font-size:12.5px; font-weight:600; color:var(--ink-2); cursor:pointer; transition: all .15s;}
 .check-group label:hover{border-color:var(--line-2);}
-.check-group input[type=checkbox]{
-  accent-color:var(--teal); width:16px; height:16px; cursor:pointer;
-}
-.check-group label:has(input:checked){
-  background: rgba(20,184,166,.08); border-color: rgba(20,184,166,.4); color:var(--ink);
-}
-
+.check-group input[type=checkbox]{accent-color:var(--teal); width:16px; height:16px; cursor:pointer;}
+.check-group label:has(input:checked){background: rgba(20,184,166,.08); border-color: rgba(20,184,166,.4); color:var(--ink);}
 .action-row{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;}
 
-/* LKPD Preview (putih, mirip kertas) */
-#lkpdPreview{
-  background:#ffffff; color:#111;
-  padding:42px 48px;
-  border-radius:var(--radius);
-  font-family:'Times New Roman', Times, serif;
-  font-size:12.5pt; line-height:1.55;
-  box-shadow: var(--shadow-lg);
-  max-width: 900px; margin:0 auto;
-}
-#lkpdPreview h1{
-  font-size:15pt; text-align:center; margin:0 0 4px;
-  color:#111; font-family:'Times New Roman', serif; font-weight:700;
-}
-#lkpdPreview > p:first-of-type + p{
-  text-align:center; font-weight:700; font-size:12pt;
-}
-#lkpdPreview h2{
-  font-size:12.5pt; color:#111;
-  margin:18px 0 6px; padding-bottom:3px;
-  border-bottom:1.5px solid #333;
-  font-family:'Times New Roman', serif; font-weight:700;
-}
-#lkpdPreview h3{
-  font-size:12pt; color:#111;
-  margin:12px 0 4px;
-  font-family:'Times New Roman', serif;
-}
-#lkpdPreview p, #lkpdPreview li{
-  font-size:11.5pt; color:#111; line-height:1.55;
-  font-family:'Times New Roman', serif;
-}
-#lkpdPreview table{
-  border-collapse:collapse; width:100%; margin:8px 0;
-}
-#lkpdPreview th, #lkpdPreview td{
-  border:1px solid #333; padding:6px 8px;
-  font-size:11pt; vertical-align:top;
-}
+#lkpdPreview{background:#ffffff; color:#111; padding:42px 48px; border-radius:var(--radius);
+  font-family:'Times New Roman', Times, serif; font-size:12.5pt; line-height:1.55;
+  box-shadow: var(--shadow-lg); max-width: 900px; margin:0 auto;}
+#lkpdPreview h1{font-size:15pt; text-align:center; margin:0 0 4px; color:#111; font-family:'Times New Roman', serif; font-weight:700;}
+#lkpdPreview > p:first-of-type + p{text-align:center; font-weight:700; font-size:12pt;}
+#lkpdPreview h2{font-size:12.5pt; color:#111; margin:18px 0 6px; padding-bottom:3px; border-bottom:1.5px solid #333; font-family:'Times New Roman', serif; font-weight:700;}
+#lkpdPreview h3{font-size:12pt; color:#111; margin:12px 0 4px; font-family:'Times New Roman', serif;}
+#lkpdPreview p, #lkpdPreview li{font-size:11.5pt; color:#111; line-height:1.55; font-family:'Times New Roman', serif;}
+#lkpdPreview table{border-collapse:collapse; width:100%; margin:8px 0;}
+#lkpdPreview th, #lkpdPreview td{border:1px solid #333; padding:6px 8px; font-size:11pt; vertical-align:top;}
 #lkpdPreview th{background:#e8e8e8; font-weight:700; text-align:center;}
-#lkpdPreview .identitas{
-  border:1.5px solid #333; padding:12px 16px; margin-bottom:16px;
-}
+#lkpdPreview .identitas{border:1.5px solid #333; padding:12px 16px; margin-bottom:16px;}
 #lkpdPreview .identitas td{border:none; padding:3px 6px; font-size:11.5pt;}
 #lkpdPreview .identitas td:first-child{width:140px; font-weight:600;}
-#lkpdPreview .ttd{
-  margin-top:32px; display:flex; justify-content:space-between;
-  font-size:11.5pt; gap:20px;
-}
+#lkpdPreview .ttd{margin-top:32px; display:flex; justify-content:space-between; font-size:11.5pt; gap:20px;}
 #lkpdPreview .ttd > div{text-align:center; flex:1;}
-#lkpdPreview .ttd .line{
-  margin-top:64px; border-top:1px solid #333;
-  padding-top:4px; width:200px; margin-left:auto; margin-right:auto;
-}
+#lkpdPreview .ttd .line{margin-top:64px; border-top:1px solid #333; padding-top:4px; width:200px; margin-left:auto; margin-right:auto;}
 
-.note{
-  display:flex; gap:10px; align-items:flex-start;
-  font-size:12.5px; color:var(--ink-2);
-  background:rgba(20,184,166,.05);
-  border:1px solid rgba(20,184,166,.18);
-  border-radius:10px;
-  padding:12px 15px;
-  margin-top:14px;
-  line-height:1.6;
-}
+.note{display:flex; gap:10px; align-items:flex-start; font-size:12.5px; color:var(--ink-2);
+  background:rgba(20,184,166,.05); border:1px solid rgba(20,184,166,.18); border-radius:10px;
+  padding:12px 15px; margin-top:14px; line-height:1.6;}
 .note .ic{color:var(--teal); flex-shrink:0;}
 
-/* ============ FOOTER ============ */
-footer{
-  text-align:center; color:var(--mute);
-  font-size:12px; padding:40px 0 10px;
-  border-top:1px solid var(--line);
-  margin-top:40px;
-}
+footer{text-align:center; color:var(--mute); font-size:12px; padding:40px 0 10px; border-top:1px solid var(--line); margin-top:40px;}
 
-/* ============ MATHJAX FIX ============ */
-mjx-container{
-  font-size:1.02em !important;
-  line-height:1 !important;
-  direction:ltr;
-}
-mjx-container svg{
-  max-width:100% !important;
-  height:auto !important;
-  vertical-align:middle;
-  display:inline-block !important;
-}
-mjx-container[display="true"]{
-  display:block !important;
-  margin:8px 0 !important;
-  overflow-x:auto;
-  overflow-y:hidden;
-  text-align:center;
-}
-mjx-container[display="true"] svg{
-  display:block !important;
-  margin:0 auto !important;
-  max-height:none;
-}
+mjx-container{font-size:1.02em !important; line-height:1 !important; direction:ltr;}
+mjx-container svg{max-width:100% !important; height:auto !important; vertical-align:middle; display:inline-block !important;}
+mjx-container[display="true"]{display:block !important; margin:8px 0 !important; overflow-x:auto; overflow-y:hidden; text-align:center;}
+mjx-container[display="true"] svg{display:block !important; margin:0 auto !important; max-height:none;}
 
-/* ============ RESPONSIVE ============ */
 @media (max-width:960px){
   .lab-grid{grid-template-columns:1fr;}
   .side-card{position:static;}
@@ -598,8 +261,6 @@ mjx-container[display="true"] svg{
   #lkpdPreview{padding:24px 20px;}
   #lkpdPreview .ttd{flex-direction:column;}
 }
-
-/* ============ PRINT ============ */
 @media print{
   body{background:#fff; color:#000;}
   header.site, .tabs, .action-row, .note, footer{display:none !important;}
@@ -631,7 +292,7 @@ mjx-container[display="true"] svg{
 
 <main class="wrap">
 
-<!-- ======================= TAB: DASAR TEORI ======================= -->
+<!-- ============ TAB: DASAR TEORI ============ -->
 <section class="tab active theory" id="tab-teori">
   <div class="page-head">
     <span class="eyebrow">Landasan Konsep</span>
@@ -654,81 +315,52 @@ mjx-container[display="true"] svg{
             <stop offset="100%" stop-color="#dc2626"/>
           </radialGradient>
         </defs>
-
-        <!-- ceiling bar -->
         <rect x="140" y="14" width="100" height="9" fill="#384159" rx="3"/>
         <line x1="130" y1="23" x2="250" y2="23" stroke="#2a3145" stroke-width="1.5"/>
-
-        <!-- dashed vertical reference -->
         <line x1="190" y1="30" x2="190" y2="270" stroke="#384159" stroke-dasharray="4 5" stroke-width="1"/>
-
-        <!-- arc + theta (FIXED: busur mengelilingi pivot, terbuka ke atas) -->
         <path d="M 190 90 A 60 60 0 0 0 223 80" fill="none" stroke="#f5b301" stroke-width="1.8"/>
         <text x="205" y="83" fill="#f5b301" font-family="Georgia, serif" font-style="italic" font-size="16">θ</text>
-
-        <!-- pivot -->
         <circle cx="190" cy="30" r="4.5" fill="#c3cad8"/>
-
-        <!-- string -->
         <line x1="190" y1="30" x2="282" y2="170" stroke="#8b93a7" stroke-width="1.8"/>
-
-        <!-- ball -->
         <circle cx="282" cy="170" r="18" fill="url(#ballGrad)" stroke="#b91c1c" stroke-width="1.2"/>
         <text x="282" y="175" text-anchor="middle" fill="#fff" font-family="Georgia, serif" font-style="italic" font-size="13">m</text>
-
-        <!-- gravity vector -->
         <line x1="282" y1="190" x2="282" y2="250" stroke="#3b82f6" stroke-width="2.2" marker-end="url(#arrBlue)"/>
         <text x="292" y="244" fill="#3b82f6" font-family="Georgia, serif" font-style="italic" font-size="13">mg</text>
-
-        <!-- tension vector -->
         <line x1="282" y1="170" x2="233" y2="122" stroke="#ef4444" stroke-width="2.2" marker-end="url(#arrRed)"/>
         <text x="208" y="118" fill="#ef4444" font-family="Georgia, serif" font-style="italic" font-size="13">T</text>
-
-        <!-- tangential component -->
         <line x1="282" y1="170" x2="345" y2="193" stroke="#f5b301" stroke-width="2.2" marker-end="url(#arrAmber)"/>
         <text x="345" y="187" fill="#f5b301" font-family="Georgia, serif" font-style="italic" font-size="12">mg sin θ</text>
-
-        <!-- L label -->
         <text x="215" y="105" fill="#c3cad8" font-family="Georgia, serif" font-style="italic" font-size="14">L</text>
       </svg>
       <figcaption>Gambar 1. Diagram gaya pada bandul sederhana: tegangan tali $T$, gravitasi $mg$, dan komponen tangensial $mg\sin\theta$ yang berperan sebagai gaya pemulih.</figcaption>
     </figure>
 
     <p>Komponen gaya gravitasi yang tegak lurus tali berperan sebagai <b>gaya pemulih</b>. Dari hukum II Newton untuk gerak rotasi, kita peroleh persamaan gerak bandul yang sebenarnya (tanpa pendekatan):</p>
-
     <div class="formula">$$\frac{d^2\theta}{dt^2} = -\frac{g}{L}\,\sin\theta$$</div>
-
     <p>Untuk sudut kecil, berlaku pendekatan $\sin\theta \approx \theta$ (dalam radian), sehingga persamaan menjadi persamaan <b>Getaran Harmonik Sederhana (GHS)</b>:</p>
-
     <div class="formula">$$\frac{d^2\theta}{dt^2} \approx -\frac{g}{L}\,\theta \;\;\Longrightarrow\;\; T = 2\pi\sqrt{\frac{L}{g}}$$</div>
-
     <div class="callout">
       <span class="ic">⚠️</span>
-      <div>
-        <p><b>Batas berlaku GHS.</b> Pendekatan $\sin\theta \approx \theta$ hanya akurat untuk $\theta \lesssim 15°$. Untuk sudut besar (60°–75°), periode sebenarnya <i>sedikit lebih panjang</i> dari rumus di atas. Bandingkan langsung di tab <b>Virtual Lab</b>!</p>
-      </div>
+      <div><p><b>Batas berlaku GHS.</b> Pendekatan $\sin\theta \approx \theta$ hanya akurat untuk $\theta \lesssim 15°$. Untuk sudut besar (60°–75°), periode sebenarnya <i>sedikit lebih panjang</i> dari rumus di atas.</p></div>
     </div>
   </div>
 
   <div class="card">
     <h2><span class="num">2</span>Tumbukan</h2>
-    <p>Saat kedua bola bertemu di titik terendah, terjadi tumbukan. Momentum total sistem <b>selalu kekal</b> pada setiap jenis tumbukan:</p>
-
+    <p>Saat permukaan kedua bola bersentuhan (di sekitar titik terendah), terjadi tumbukan. Pada tumbukan dua benda bebas, momentum total sistem <b>selalu kekal</b>:</p>
     <div class="formula">$$m_1 v_1 + m_2 v_2 = m_1 v_1' + m_2 v_2'$$</div>
-
     <p>Sedangkan <b>koefisien restitusi</b> $e$ menentukan seberapa besar energi kinetik yang hilang:</p>
-
     <div class="formula">$$e = -\,\frac{v_2' - v_1'}{v_2 - v_1}$$</div>
+
+    <div class="callout"><span class="ic">🧩</span><div><p><b>Model di simulasi.</b> Bola adalah bandul bertali tak-mulur, sehingga impuls kontak bekerja sepanjang garis pusat-ke-pusat $\hat n$. Dengan $a_i=\hat n\cdot\hat t_i$ ($\hat t_i$ = arah gerak bola $i$) dan $v_{rel,n}=(\vec v_2-\vec v_1)\cdot\hat n$:</p>
+<div class="formula">$$J=\frac{-(1+e)\,v_{rel,n}}{a_1^2/m_1+a_2^2/m_2},\qquad \Delta\omega_1=-\frac{J\,a_1}{m_1L_1},\quad \Delta\omega_2=\frac{J\,a_2}{m_2L_2}$$</div>
+<p>Di dasar lintasan ($a_i\to1$) ini menjadi tumbukan 1-D biasa. Karena tali ikut memberi impuls, $\sum p_x$ hanya kekal tepat bila garis tumbukan tegak lurus tali; pada simulasi selisihnya kecil (lihat log).</p></div></div>
 
     <figure class="svg-figure mathjax_ignore">
       <svg viewBox="0 0 720 220" width="720" height="220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tiga jenis tumbukan">
         <defs>
-          <marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto">
-            <path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/>
-          </marker>
+          <marker id="ar2" markerWidth="9" markerHeight="9" refX="8" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#3b82f6"/></marker>
         </defs>
-
-        <!-- e = 1 -->
         <g transform="translate(15,15)">
           <text x="110" y="18" text-anchor="middle" fill="#14b8a6" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700">e = 1 (Lenting Sempurna)</text>
           <circle cx="65" cy="70" r="15" fill="#ef4444"/>
@@ -746,8 +378,6 @@ mjx-container[display="true"] svg{
           <text x="172" y="147" fill="#3b82f6" font-size="11" font-family="monospace">v₂′</text>
           <text x="105" y="192" text-anchor="middle" fill="#8b93a7" font-size="10">EK total kekal</text>
         </g>
-
-        <!-- e = 0.6 -->
         <g transform="translate(255,15)">
           <text x="105" y="18" text-anchor="middle" fill="#f5b301" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700">0 &lt; e &lt; 1 (Lenting Sebagian)</text>
           <circle cx="65" cy="70" r="15" fill="#ef4444"/>
@@ -761,8 +391,6 @@ mjx-container[display="true"] svg{
           <line x1="152" y1="155" x2="176" y2="155" stroke="#3b82f6" stroke-width="2" marker-end="url(#ar2)"/>
           <text x="105" y="192" text-anchor="middle" fill="#8b93a7" font-size="10">sebagian EK → bunyi/panas</text>
         </g>
-
-        <!-- e = 0 -->
         <g transform="translate(500,15)">
           <text x="105" y="18" text-anchor="middle" fill="#ef4444" font-family="Plus Jakarta Sans, sans-serif" font-size="13" font-weight="700">e = 0 (Tidak Lenting)</text>
           <circle cx="65" cy="70" r="15" fill="#ef4444"/>
@@ -775,7 +403,7 @@ mjx-container[display="true"] svg{
           <text x="105" y="192" text-anchor="middle" fill="#8b93a7" font-size="10">menempel, v sama</text>
         </g>
       </svg>
-      <figcaption>Gambar 2. Tiga jenis tumbukan menurut nilai koefisien restitusi $e$: lenting sempurna, lenting sebagian, dan tidak lenting sama sekali.</figcaption>
+      <figcaption>Gambar 2. Tiga jenis tumbukan menurut nilai koefisien restitusi $e$.</figcaption>
     </figure>
 
     <ul style="color:var(--ink-2); font-size:14px; line-height:1.85; padding-left:22px;">
@@ -787,38 +415,26 @@ mjx-container[display="true"] svg{
 
   <div class="card">
     <h2><span class="num">3</span>Konversi Energi pada Lato-Lato</h2>
-    <p>Selama ayunan, energi mekanik total $E = E_p + E_k$ terus berubah bentuk. Di titik tertinggi, energi kinetik nol dan energi potensial maksimum; di titik terendah, sebaliknya.</p>
-
+    <p>Selama ayunan, energi mekanik total $E = E_p + E_k$ terus berubah bentuk.</p>
     <div class="formula">$$E = m g L\,(1-\cos\theta) + \tfrac{1}{2}\,m v^2$$</div>
 
     <figure class="svg-figure mathjax_ignore">
       <svg viewBox="0 0 560 260" width="560" height="260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Konversi energi pada bandul">
-        <!-- ceiling -->
         <rect x="220" y="14" width="120" height="9" fill="#384159" rx="3"/>
         <circle cx="280" cy="30" r="4.5" fill="#c3cad8"/>
-
-        <!-- arc path (FIXED: busur melewati titik B di bawah, ∪) -->
         <path d="M 160 200 Q 280 236 400 200" fill="none" stroke="#2a3145" stroke-width="1.5" stroke-dasharray="3 4"/>
-
-        <!-- left position -->
         <line x1="280" y1="30" x2="160" y2="200" stroke="#5f6779" stroke-width="1.5"/>
         <circle cx="160" cy="200" r="14" fill="#8b93a7"/>
         <text x="160" y="205" text-anchor="middle" fill="#0b0e14" font-size="11" font-weight="700">A</text>
         <text x="160" y="240" text-anchor="middle" fill="#f5b301" font-size="11.5" font-weight="700">Eₚ max · Ek = 0</text>
-
-        <!-- bottom -->
         <line x1="280" y1="30" x2="280" y2="218" stroke="#5f6779" stroke-width="1.5"/>
         <circle cx="280" cy="218" r="14" fill="#8b93a7"/>
         <text x="280" y="223" text-anchor="middle" fill="#0b0e14" font-size="11" font-weight="700">B</text>
         <text x="280" y="252" text-anchor="middle" fill="#14b8a6" font-size="11.5" font-weight="700">Ek max · Eₚ = 0</text>
-
-        <!-- right position -->
         <line x1="280" y1="30" x2="400" y2="200" stroke="#5f6779" stroke-width="1.5"/>
         <circle cx="400" cy="200" r="14" fill="#8b93a7"/>
         <text x="400" y="205" text-anchor="middle" fill="#0b0e14" font-size="11" font-weight="700">C</text>
         <text x="400" y="240" text-anchor="middle" fill="#f5b301" font-size="11.5" font-weight="700">Eₚ max · Ek = 0</text>
-
-        <!-- energy bar -->
         <defs>
           <linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stop-color="#f5b301"/>
@@ -830,39 +446,40 @@ mjx-container[display="true"] svg{
         <text x="41" y="32" text-anchor="middle" fill="#8b93a7" font-size="10.5" font-weight="600">E total</text>
         <text x="41" y="240" text-anchor="middle" fill="#5f6779" font-size="9.5">konstan</text>
       </svg>
-      <figcaption>Gambar 3. Energi mekanik total kekal sepanjang ayunan (tanpa redaman). Di titik A dan C energi kinetik nol, di titik B energi kinetik maksimum.</figcaption>
+      <figcaption>Gambar 3. Energi mekanik total kekal sepanjang ayunan (tanpa redaman).</figcaption>
     </figure>
   </div>
 
   <div class="card">
     <h2><span class="num">4</span>Mengapa Lato-Lato Berhenti Berbunyi?</h2>
-    <p>Pada setiap tumbukan dengan $e < 1$, sebagian energi kinetik berubah menjadi <b>bunyi</b> (itulah suara "tek-tek"!) dan <b>panas</b>. Ditambah redaman udara, amplitudo ayunan terus mengecil hingga akhirnya berhenti.</p>
-
+    <p>Pada setiap tumbukan dengan $e < 1$, sebagian energi kinetik berubah menjadi <b>bunyi</b> dan <b>panas</b>. Ditambah redaman udara, amplitudo ayunan terus mengecil.</p>
     <div class="formula">$$E_k^{\text{hilang}} = \tfrac{1}{2}\,\mu\,(v_{\text{rel}})^2\,(1 - e^2)$$</div>
-
-    <p>dengan $\mu = \dfrac{m_1 m_2}{m_1 + m_2}$ adalah <b>massa tereduksi</b>. Untuk terus berbunyi, tangan pemain harus terus "memompa" energi — itulah peran tombol <b>⚡ Beri Dorongan</b> pada simulasi.</p>
-
+    <p>dengan $\mu = \dfrac{m_1 m_2}{m_1 + m_2}$ adalah <b>massa tereduksi</b>. Untuk terus berbunyi, tangan pemain harus terus "memompa" energi — itulah peran tombol <b>⚡ Beri Dorongan</b>.</p>
     <div class="callout">
       <span class="ic">🎯</span>
-      <div>
-        <p><b>Kesimpulan kunci:</b> lato-lato adalah contoh nyata perpaduan <b>gerak osilasi</b> dan <b>tumbukan berulang</b>. Energi total sistem berkurang setiap tumbukan (jika $e<1$), tetapi <b>momentum selalu kekal</b> — inilah dua pilar utama mekanika klasik.</p>
-      </div>
+      <div><p><b>Kesimpulan kunci:</b> lato-lato adalah contoh nyata perpaduan <b>gerak osilasi</b> dan <b>tumbukan berulang</b>. Energi total sistem berkurang setiap tumbukan (jika $e<1$), tetapi <b>momentum selalu kekal</b>.</p></div>
     </div>
   </div>
 </section>
 
-<!-- ======================= TAB: VIRTUAL LAB ======================= -->
+<!-- ============ TAB: VIRTUAL LAB ============ -->
 <section class="tab" id="tab-lab">
   <div class="page-head">
     <span class="eyebrow">Simulasi Interaktif</span>
     <h1>Virtual Lab Lato-Lato</h1>
-    <p class="lede">Ubah parameter di panel kanan dan amati efeknya secara langsung pada gerak kedua bola, grafik, serta log tumbukan.</p>
+    <p class="lede">Geser slider untuk melihat perubahan secara langsung. Aktifkan vektor gaya untuk memvisualisasikan <b>mg</b>, <b>T</b>, <b>mg sin θ</b>, dan <b>v</b>. Gunakan mode <b>slow motion</b> untuk mengamati tumbukan secara detail. Suara "tak" akan terdengar setiap tumbukan.</p>
   </div>
 
   <div class="lab-grid">
     <div class="card stage-card">
       <div id="canvasHolder"></div>
-      <div class="controls-row">
+      <div class="vec-legend" id="vecLegend">
+        <span><span class="sw" style="background:#3b82f6"></span>mg (gravitasi)</span>
+        <span><span class="sw" style="background:#ef4444"></span>T (tegangan tali)</span>
+        <span><span class="sw" style="background:#f5b301"></span>mg sin θ (gaya pemulih)</span>
+        <span><span class="sw" style="background:#14b8a6"></span>v (kecepatan)</span>
+      </div>
+      <div class="controls-row" style="margin-top:6px;">
         <button id="btnToggle" class="btn btn-primary">▶ Mulai</button>
         <button id="btnReset" class="btn">↺ Reset</button>
         <button id="btnPush" class="btn btn-push">⚡ Beri Dorongan</button>
@@ -872,11 +489,16 @@ mjx-container[display="true"] svg{
         <div class="readout r-amber"><span class="lbl">θ Bola Kuning</span><span class="val" id="outTh2">0.0</span><span class="unit">°</span></div>
         <div class="readout r-red"><span class="lbl">v Bola Merah</span><span class="val" id="outV1">0.00</span><span class="unit">m/s</span></div>
         <div class="readout r-amber"><span class="lbl">v Bola Kuning</span><span class="val" id="outV2">0.00</span><span class="unit">m/s</span></div>
+        <div class="readout r-red"><span class="lbl">T teori / ukur (M)</span><span class="val" id="outT1" style="font-size:13px">0.00 / –</span><span class="unit">s</span></div>
+        <div class="readout r-amber"><span class="lbl">T teori / ukur (K)</span><span class="val" id="outT2" style="font-size:13px">0.00 / –</span><span class="unit">s</span></div>
         <div class="readout"><span class="lbl">Waktu</span><span class="val" id="outT">0.00</span><span class="unit">s</span></div>
         <div class="readout"><span class="lbl">Tumbukan</span><span class="val" id="outColl">0</span><span class="unit">×</span></div>
         <div class="readout"><span class="lbl">Energi Mekanik</span><span class="val" id="outEnergy">0.00</span><span class="unit">mJ</span></div>
-        <div class="readout"><span class="lbl">Momentum</span><span class="val" id="outMomentum">0.00</span><span class="unit">g·m/s</span></div>
+        <div class="readout"><span class="lbl">Σ Momentum (x)</span><span class="val" id="outMomentum">0.00</span><span class="unit">g·m/s</span></div>
+        <div class="readout"><span class="lbl">e terukur</span><span class="val" id="outEm">–</span></div>
+        <div class="readout"><span class="lbl">E hilang (tumbukan)</span><span class="val" id="outLost">0.00</span><span class="unit">mJ</span></div>
       </div>
+      <div id="initWarn" class="note" style="display:none"></div>
     </div>
 
     <div class="card side-card">
@@ -896,6 +518,14 @@ mjx-container[display="true"] svg{
         <div class="block-title">⚙️ Parameter Umum</div>
         <label class="slider"><span class="head">Koefisien restitusi (e) <b class="val" id="vE">0.90</b></span><input type="range" id="E" min="0" max="1" step="0.05" value="0.9"></label>
         <label class="slider"><span class="head">Redaman udara <b class="val" id="vD">0.02</b></span><input type="range" id="D" min="0" max="0.3" step="0.01" value="0.02"></label>
+        <label class="slider"><span class="head">🎬 Kecepatan simulasi</span>
+          <select id="SPEED" class="select-box">
+            <option value="0.25">🐢 Sangat lambat (0.25×)</option>
+            <option value="0.5">🐢 Lambat (0.5×)</option>
+            <option value="1" selected>▶ Normal (1×)</option>
+            <option value="1.5">⏩ Cepat (1.5×)</option>
+          </select>
+        </label>
         <label class="slider"><span class="head">Gravitasi (g)</span>
           <select id="G" class="select-box">
             <option value="1.6">Bulan — 1.6 m/s²</option>
@@ -905,44 +535,50 @@ mjx-container[display="true"] svg{
           </select>
         </label>
       </div>
+      <div class="side-block">
+        <div class="block-title">🔍 Tampilan</div>
+        <div class="vec-options">
+          <label><input type="checkbox" id="showVec1"> Vektor Bola Merah</label>
+          <label><input type="checkbox" id="showVec2"> Vektor Bola Kuning</label>
+          <label><input type="checkbox" id="soundOn" checked> 🔊 Suara tumbukan</label>
+          <label><input type="checkbox" id="collideOn" checked> 💥 Tumbukan aktif (matikan untuk mengamati GHS murni)</label>
+        </div>
+      </div>
       <div class="note">
         <span class="ic">💡</span>
-        <span>Perubahan θ₀ baru berlaku setelah klik <b>Reset</b>. Parameter lain berlaku langsung, bahkan saat simulasi berjalan.</span>
+        <span>Sudut awal <b>langsung tampil</b> saat slider digeser. Gunakan <b>slow motion</b> untuk mengamati tumbukan secara rinci.</span>
       </div>
     </div>
   </div>
 
   <div class="card graph-card">
     <h2 style="margin-top:0;">Grafik Simpangan Sudut θ(t)</h2>
-    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Bandingkan bentuk gelombang kedua bola. Perhatikan bagaimana amplitudonya mengecil akibat redaman &amp; tumbukan.</p>
+    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Bandingkan bentuk gelombang kedua bola. Amplitudo mengecil akibat redaman &amp; tumbukan.</p>
     <canvas id="graphTheta" width="960" height="180" class="graph-canvas"></canvas>
 
     <h2>Grafik Energi Mekanik Total</h2>
-    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Perhatikan pola "anak tangga" saat e &lt; 1 — setiap tangga menandai satu tumbukan yang menghilangkan energi.</p>
+    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Pola "anak tangga" saat e &lt; 1 — setiap tangga = satu tumbukan yang menghilangkan energi.</p>
     <canvas id="graphEnergy" width="960" height="140" class="graph-canvas"></canvas>
   </div>
 
   <div class="card">
     <h2 style="margin-top:0;">📋 Log Tumbukan</h2>
-    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Data numerik setiap kali bola bertabrakan: waktu, kecepatan sebelum &amp; sesudah, serta energi yang hilang.</p>
+    <p style="color:var(--dim); font-size:13px; margin-top:-6px;">Data numerik setiap tumbukan: waktu, kecepatan sebelum &amp; sesudah, serta energi yang hilang.</p>
     <div class="log-list" id="logList"><div class="log-empty">Belum ada tumbukan. Klik "Mulai" untuk menjalankan simulasi.</div></div>
   </div>
 </section>
 
-<!-- ======================= TAB: LKPD ======================= -->
+<!-- ============ TAB: LKPD ============ -->
 <section class="tab" id="tab-lkpd">
   <div class="page-head">
     <span class="eyebrow">Generator Lembar Kerja</span>
     <h1>LKPD — Lembar Kerja Peserta Didik</h1>
-    <p class="lede">Isi identitas &amp; pilih bagian yang ingin disertakan. Pratinjau di bawah akan ter-update otomatis, lalu unduh sebagai Word atau PDF siap cetak.</p>
+    <p class="lede">Isi identitas &amp; pilih bagian yang ingin disertakan. Pratinjau akan ter-update otomatis, lalu unduh sebagai Word atau PDF siap cetak.</p>
   </div>
 
   <div class="card">
     <div class="lkpd-form">
-      <div class="field full">
-        <label>Judul LKPD</label>
-        <input id="fJudul" value="Gerak Harmonik & Tumbukan pada Lato-Lato">
-      </div>
+      <div class="field full"><label>Judul LKPD</label><input id="fJudul" value="Gerak Harmonik & Tumbukan pada Lato-Lato"></div>
       <div class="field"><label>Sekolah</label><input id="fSekolah" value="SMA Negeri 1 Nusantara"></div>
       <div class="field"><label>Mata Pelajaran</label><input id="fMapel" value="Fisika"></div>
       <div class="field"><label>Kelas / Semester</label><input id="fKelas" value="X / Ganjil"></div>
@@ -950,17 +586,14 @@ mjx-container[display="true"] svg{
       <div class="field"><label>Nama Siswa</label><input id="fNama" placeholder="(kosongkan agar diisi siswa)"></div>
       <div class="field"><label>Tanggal</label><input type="date" id="fTanggal"></div>
       <div class="field full"><label>Guru Mata Pelajaran</label><input id="fGuru" value="............................."></div>
-
-      <div class="field full">
-        <label>Tujuan Pembelajaran (satu per baris)</label>
+      <div class="field full"><label>Tujuan Pembelajaran (satu per baris)</label>
         <textarea id="fTujuan">Memahami gerak bandul sederhana sebagai contoh GHS
 Menganalisis pengaruh panjang tali terhadap periode ayunan
 Memahami hukum kekekalan momentum pada tumbukan
 Menentukan koefisien restitusi dari data eksperimen
 Menganalisis pengaruh koefisien restitusi terhadap energi mekanik</textarea>
       </div>
-      <div class="field full">
-        <label>Alat &amp; Bahan (satu per baris)</label>
+      <div class="field full"><label>Alat &amp; Bahan (satu per baris)</label>
         <textarea id="fAlat">Laptop / HP / tablet
 Aplikasi Virtual Lab Lato-Lato
 Alat tulis
@@ -992,7 +625,7 @@ Kalkulator</textarea>
   <div id="lkpdPreview"></div>
 </section>
 
-<!-- ======================= TAB: KUIS ======================= -->
+<!-- ============ TAB: KUIS ============ -->
 <section class="tab" id="tab-kuis">
   <div class="page-head">
     <span class="eyebrow">Asesmen Formatif</span>
@@ -1017,199 +650,408 @@ Kalkulator</textarea>
 ============================================================ */
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabSections = document.querySelectorAll('section.tab');
-
 tabButtons.forEach(btn => btn.addEventListener('click', () => {
   const target = btn.dataset.tab;
   tabButtons.forEach(b => b.classList.toggle('active', b === btn));
   tabSections.forEach(s => s.classList.toggle('active', s.id === 'tab-' + target));
   window.scrollTo({top:0, behavior:'smooth'});
   if(target === 'lab') initLab();
-  if(window.MathJax && MathJax.typesetPromise){
-    MathJax.typesetPromise();
-  }
+  if(window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise();
 }));
 
 /* ============================================================
-   2. V-LAB (physics + p5.js)
+   2. AUDIO — "tak" sound
+============================================================ */
+let audioCtx = null;
+function initAudio(){
+  if(audioCtx) return;
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  catch(e){ audioCtx = null; }
+}
+function playTak(volume = 0.35){
+  if(!audioCtx) return;
+  if(audioCtx.state === 'suspended') audioCtx.resume();
+  const now = audioCtx.currentTime;
+  const v = Math.max(0.02, Math.min(0.9, volume));
+
+  const osc = audioCtx.createOscillator();
+  const g1 = audioCtx.createGain();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(1400, now);
+  osc.frequency.exponentialRampToValueAtTime(220, now + 0.05);
+  g1.gain.setValueAtTime(v, now);
+  g1.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+  osc.connect(g1).connect(audioCtx.destination);
+  osc.start(now); osc.stop(now + 0.1);
+
+  const dur = 0.06;
+  const bufSize = Math.max(1, Math.floor(audioCtx.sampleRate * dur));
+  const buf = audioCtx.createBuffer(1, bufSize, audioCtx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0; i<bufSize; i++){
+    const env = Math.pow(1 - i/bufSize, 3);
+    data[i] = (Math.random()*2 - 1) * env;
+  }
+  const src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  const bp = audioCtx.createBiquadFilter();
+  bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 1.2;
+  const g2 = audioCtx.createGain();
+  g2.gain.value = v * 0.7;
+  src.connect(bp).connect(g2).connect(audioCtx.destination);
+  src.start(now);
+}
+
+/* ============================================================
+   3. V-LAB
 ============================================================ */
 const params = { L1:0.25, M1:25, A1:35, L2:0.25, M2:25, A2:35, E:0.9, D:0.02, G:9.8 };
-const state = {
-  t:0, running:false, wasOverlap:false,
-  th1:0, om1:0, th2:0, om2:0,
-  collisions:0, histTh1:[], histTh2:[], histE:[]
-};
+const state = { t:0, running:false, th1:0, om1:0, th2:0, om2:0, collisions:0, lostTotal:0, lastE:null,
+                E0:0, ampMax:10, hist:[], marks:[], speed:1 };
+const display = { vec1:false, vec2:false, sound:true, collide:true };
+const cross = {1:null, 2:null}, periodMeas = {1:null, 2:null};
+const WINDOW_S = 8;   // lebar jendela grafik (detik simulasi)
 
-const degToRad = d => d*Math.PI/180;
-const radToDeg = r => r*180/Math.PI;
-const ballRadiusM = m => 0.012 + 0.0016*Math.sqrt(m);
+const pxPerM = 240;
+const ballRadiusPx = m => 13 * Math.cbrt(m/25);     // bahan sama → r ∝ m^(1/3)
+const ballRadiusM  = m => ballRadiusPx(m) / pxPerM;
+const degToRad = d => d*Math.PI/180, radToDeg = r => r*180/Math.PI;
+
+/* ---------- Geometri & kontak (pivot di (0,0), sumbu y ke bawah) ---------- */
+function geom(){
+  const x1 = params.L1*Math.sin(state.th1), y1 = params.L1*Math.cos(state.th1);
+  const x2 = params.L2*Math.sin(state.th2), y2 = params.L2*Math.cos(state.th2);
+  const dx = x2-x1, dy = y2-y1, dist = Math.hypot(dx,dy) || 1e-9;
+  return { nx:dx/dist, ny:dy/dist, dist, sumR: ballRadiusM(params.M1)+ballRadiusM(params.M2) };
+}
+const overlapped = () => { const g = geom(); return g.dist < g.sumR; };
+
+/* a_i = n·t_i, dengan t_i = (cosθ, −sinθ) = arah gerak bola i.
+   v_i·n = L_i·a_i·ω_i  →  laju relatif sepanjang garis pusat-ke-pusat. */
+function contactTerms(){
+  const g = geom();
+  const a1 = g.nx*Math.cos(state.th1) - g.ny*Math.sin(state.th1);
+  const a2 = g.nx*Math.cos(state.th2) - g.ny*Math.sin(state.th2);
+  const m1 = params.M1/1000, m2 = params.M2/1000;
+  return { g, a1, a2, m1, m2,
+           vrel: params.L2*a2*state.om2 - params.L1*a1*state.om1,   // < 0 → saling mendekat
+           K: a1*a1/m1 + a2*a2/m2 };
+}
+const kineticEnergy = () => 0.5*(params.M1/1000)*Math.pow(params.L1*state.om1,2)
+                          + 0.5*(params.M2/1000)*Math.pow(params.L2*state.om2,2);
+const momentumX = () => (params.M1/1000)*params.L1*state.om1*Math.cos(state.th1)
+                      + (params.M2/1000)*params.L2*state.om2*Math.cos(state.th2);
+function currentEnergyMilliJ(){
+  const g = params.G;
+  const pe = (params.M1/1000)*g*params.L1*(1-Math.cos(state.th1))
+           + (params.M2/1000)*g*params.L2*(1-Math.cos(state.th2));
+  return (kineticEnergy() + pe)*1000;
+}
+
+/* ---------- Dinamika bandul: θ'' = −(g/L) sin θ − γ θ'  (RK4, tanpa pendekatan sudut kecil) ---------- */
+function deriv(th1,om1,th2,om2){
+  return [ om1, -(params.G/params.L1)*Math.sin(th1) - params.D*om1,
+           om2, -(params.G/params.L2)*Math.sin(th2) - params.D*om2 ];
+}
+function rk4(h){
+  const y = [state.th1, state.om1, state.th2, state.om2];
+  const add = (a,b,k) => a.map((v,i) => v + b[i]*k);
+  const k1 = deriv(...y), k2 = deriv(...add(y,k1,h/2)), k3 = deriv(...add(y,k2,h/2)), k4 = deriv(...add(y,k3,h));
+  [state.th1, state.om1, state.th2, state.om2] = y.map((v,i) => v + h/6*(k1[i]+2*k2[i]+2*k3[i]+k4[i]));
+  state.t += h;
+}
+const snap = () => ({ t:state.t, th1:state.th1, om1:state.om1, th2:state.th2, om2:state.om2 });
+const restore = s => Object.assign(state, s);
+
+/* ---------- Tumbukan: impuls kontak sepanjang garis pusat-ke-pusat, kendala tali dipertahankan ----------
+   J = −(1+e)·v_rel,n / (a1²/m1 + a2²/m2);  Δω1 = −J·a1/(m1·L1);  Δω2 = +J·a2/(m2·L2)
+   Di dasar lintasan (a→1) rumus ini menjadi tumbukan 1-D biasa dengan massa tereduksi μ. */
+function applyImpulse(e){
+  const c = contactTerms();
+  if(c.vrel >= 0 || c.K < 1e-12) return null;           // tidak saling mendekat → tidak ada tumbukan
+  const L1 = params.L1, L2 = params.L2;
+  const info = { vb:c.vrel, s1b:L1*state.om1, s2b:L2*state.om2, pb:momentumX(), kb:kineticEnergy() };
+  const J = -(1+e)*c.vrel / c.K;
+  state.om1 -= J*c.a1/(c.m1*L1);
+  state.om2 += J*c.a2/(c.m2*L2);
+  info.s1a = L1*state.om1; info.s2a = L2*state.om2;
+  info.pa = momentumX(); info.lost = info.kb - kineticEnergy();
+  info.e = -contactTerms().vrel / info.vb;                // verifikasi: harus sama dengan e yang diatur
+  return info;
+}
+function resolveCollision(){
+  const vb = contactTerms().vrel;
+  if(-vb < 0.03){ applyImpulse(0); return; }             // kontak diam: tanpa pantulan & bunyi
+  const r = applyImpulse(params.E); if(!r) return;
+  state.collisions++; state.lostTotal += r.lost; state.lastE = r.e; state.marks.push(state.t);
+  addLog(r);
+  if(display.sound) playTak(Math.min(0.9, 0.08 + 0.3*(-vb)));
+}
+/* Koreksi posisi sisa tumpang-tindih (hanya untuk kontak menetap, mis. e = 0) sepanjang busur masing-masing */
+function separateOverlap(){
+  for(let i=0;i<4;i++){
+    const c = contactTerms(), pen = c.g.sumR - c.g.dist;
+    if(pen <= 0) return;
+    const s = pen / c.K;
+    state.th1 -= s*c.a1/(c.m1*params.L1);
+    state.th2 += s*c.a2/(c.m2*params.L2);
+  }
+}
+
+/* Satu langkah waktu dengan deteksi saat kontak (bisection) → impuls diterapkan TEPAT saat permukaan bersentuhan */
+function physicsStep(dt){
+  if(!display.collide){ rk4(dt); return; }
+  let remaining = dt;
+  for(let guard=0; guard<5 && remaining>1e-12; guard++){
+    const prev = snap();
+    rk4(remaining);
+    if(!overlapped()) return;
+    let lo = 0, hi = remaining;
+    for(let k=0;k<28;k++){
+      const mid = (lo+hi)/2;
+      restore(prev); rk4(mid);
+      if(overlapped()) hi = mid; else lo = mid;
+    }
+    restore(prev); if(lo > 0) rk4(lo);
+    resolveCollision();
+    remaining -= lo;
+  }
+  if(remaining > 1e-12) rk4(remaining);
+  if(overlapped() && contactTerms().vrel < 0) applyImpulse(0);
+  separateOverlap();
+}
+/* Pengukuran periode (hanya bermakna saat tumbukan dimatikan): selang antar lintasan θ=0 arah naik */
+function trackPeriod(i,a,b,dt){
+  if(a < 0 && b >= 0){
+    const tc = state.t - dt*(1 - (-a)/(b-a));
+    if(cross[i] != null) periodMeas[i] = tc - cross[i];
+    cross[i] = tc;
+  }
+}
+function stepSim(dt){
+  const a1 = state.th1, a2 = state.th2;
+  physicsStep(dt);
+  if(!display.collide){ trackPeriod(1,a1,state.th1,dt); trackPeriod(2,a2,state.th2,dt); }
+}
 
 function resetSim(){
-  state.t = 0;
-  state.th1 = -degToRad(params.A1); state.om1 = 0;
-  state.th2 =  degToRad(params.A2); state.om2 = 0;
-  state.collisions = 0;
-  state.histTh1 = []; state.histTh2 = []; state.histE = [];
-  state.wasOverlap = false;
-  state.running = false;
+  state.t = 0; state.running = false; state.collisions = 0; state.lostTotal = 0; state.lastE = null;
+  state.hist = []; state.marks = [];
+  cross[1] = cross[2] = periodMeas[1] = periodMeas[2] = null;
+  let a1 = params.A1, a2 = params.A2;
+  state.th1 = -degToRad(a1); state.th2 = degToRad(a2); state.om1 = state.om2 = 0;
+  if(display.collide){                                   // bola tidak boleh tumpang-tindih saat dilepas
+    for(let g=0; overlapped() && g<900; g++){
+      a1 += 0.1; a2 += 0.1;
+      state.th1 = -degToRad(a1); state.th2 = degToRad(a2);
+    }
+  }
+  const warn = document.getElementById('initWarn');
+  if(a1 > params.A1 + 0.05){
+    warn.style.display = 'flex';
+    warn.innerHTML = `<span class="ic">⚠️</span><span>Sudut awal disesuaikan menjadi <b>${a1.toFixed(1)}°</b> (merah) dan <b>${a2.toFixed(1)}°</b> (kuning) agar kedua bola tidak tumpang-tindih — bola dilepas tepat bersentuhan.</span>`;
+  } else warn.style.display = 'none';
+  state.ampMax = Math.max(10, a1, a2);
+  state.E0 = currentEnergyMilliJ();
   document.getElementById('btnToggle').textContent = '▶ Mulai';
   document.getElementById('logList').innerHTML = '<div class="log-empty">Belum ada tumbukan. Klik "Mulai" untuk menjalankan simulasi.</div>';
+  drawGraphs();
   updateReadouts();
 }
 
-function physicsStep(dt){
-  const g = params.G, L1 = params.L1, L2 = params.L2, d = params.D;
-  const a1 = -(g/L1)*Math.sin(state.th1) - d*state.om1;
-  state.om1 += a1*dt; state.th1 += state.om1*dt;
-  const a2 = -(g/L2)*Math.sin(state.th2) - d*state.om2;
-  state.om2 += a2*dt; state.th2 += state.om2*dt;
-  state.t += dt;
-
-  const x1 = L1*Math.sin(state.th1), y1 = L1*Math.cos(state.th1);
-  const x2 = L2*Math.sin(state.th2), y2 = L2*Math.cos(state.th2);
-  const dist = Math.hypot(x2-x1, y2-y1);
-  const r1 = ballRadiusM(params.M1), r2 = ballRadiusM(params.M2);
-  if(dist <= (r1+r2)){
-    if(!state.wasOverlap) resolveCollision();
-    state.wasOverlap = true;
-  } else state.wasOverlap = false;
-}
-
-function resolveCollision(){
-  const L1 = params.L1, L2 = params.L2;
-  const vx1 = L1*state.om1*Math.cos(state.th1);
-  const vx2 = L2*state.om2*Math.cos(state.th2);
-  const m1 = params.M1/1000, m2 = params.M2/1000;
-  const e = params.E;
-  const rel = vx1 - vx2;
-  const v1n = vx1 - (1+e)*m2*rel/(m1+m2);
-  const v2n = vx2 + (1+e)*m1*rel/(m1+m2);
-  let c1 = Math.cos(state.th1); if(Math.abs(c1)<0.25) c1 = c1<0?-0.25:0.25;
-  let c2 = Math.cos(state.th2); if(Math.abs(c2)<0.25) c2 = c2<0?-0.25:0.25;
-  state.om1 = v1n/(L1*c1);
-  state.om2 = v2n/(L2*c2);
-
-  const KEb = 0.5*m1*vx1*vx1 + 0.5*m2*vx2*vx2;
-  const KEa = 0.5*m1*v1n*v1n + 0.5*m2*v2n*v2n;
-  const lost = Math.max(0, KEb-KEa);
-  state.collisions++;
-  addLog(state.t, vx1, vx2, v1n, v2n, lost*1000);
-}
-
-function addLog(t, v1b, v2b, v1a, v2a, lostMilliJ){
+function addLog(r){
   const list = document.getElementById('logList');
   if(state.collisions === 1) list.innerHTML = '';
   const row = document.createElement('div');
   row.className = 'log-item';
-  row.innerHTML = `<b>#${state.collisions}</b> &nbsp; t = ${t.toFixed(2)} s &nbsp;·&nbsp; v₁: ${v1b.toFixed(2)} → ${v1a.toFixed(2)} m/s &nbsp;·&nbsp; v₂: ${v2b.toFixed(2)} → ${v2a.toFixed(2)} m/s &nbsp;·&nbsp; ΔE = ${lostMilliJ.toFixed(2)} mJ`;
+  row.innerHTML = `<b>#${state.collisions}</b> &nbsp; t = ${state.t.toFixed(2)} s &nbsp;·&nbsp; v₁: ${r.s1b.toFixed(2)} → ${r.s1a.toFixed(2)} m/s &nbsp;·&nbsp; v₂: ${r.s2b.toFixed(2)} → ${r.s2a.toFixed(2)} m/s &nbsp;·&nbsp; Σpₓ: ${(r.pb*1000).toFixed(2)} → ${(r.pa*1000).toFixed(2)} g·m/s &nbsp;·&nbsp; e = ${r.e.toFixed(2)} &nbsp;·&nbsp; ΔE = ${(r.lost*1000).toFixed(2)} mJ`;
   list.prepend(row);
   while(list.children.length > 8) list.removeChild(list.lastChild);
 }
 
-function currentEnergyMilliJ(){
-  const m1 = params.M1/1000, m2 = params.M2/1000;
-  const L1 = params.L1, L2 = params.L2, g = params.G;
-  const v1 = L1*state.om1*Math.cos(state.th1);
-  const v2 = L2*state.om2*Math.cos(state.th2);
-  const h1 = L1*(1-Math.cos(state.th1));
-  const h2 = L2*(1-Math.cos(state.th2));
-  return (0.5*m1*v1*v1 + m1*g*h1 + 0.5*m2*v2*v2 + m2*g*h2)*1000;
-}
-
 function updateReadouts(){
-  const v1 = params.L1*state.om1*Math.cos(state.th1);
-  const v2 = params.L2*state.om2*Math.cos(state.th2);
-  document.getElementById('outTh1').textContent = radToDeg(state.th1).toFixed(1);
-  document.getElementById('outTh2').textContent = radToDeg(state.th2).toFixed(1);
-  document.getElementById('outV1').textContent = v1.toFixed(2);
-  document.getElementById('outV2').textContent = v2.toFixed(2);
-  document.getElementById('outT').textContent = state.t.toFixed(2);
-  document.getElementById('outColl').textContent = state.collisions;
-  document.getElementById('outEnergy').textContent = currentEnergyMilliJ().toFixed(2);
-  const mom = (params.M1/1000)*v1 + (params.M2/1000)*v2;
-  document.getElementById('outMomentum').textContent = (mom*1000).toFixed(2);
+  const T0 = L => 2*Math.PI*Math.sqrt(L/params.G), fm = v => v == null ? '–' : v.toFixed(2);
+  const $ = id => document.getElementById(id);
+  $('outTh1').textContent = radToDeg(state.th1).toFixed(1);
+  $('outTh2').textContent = radToDeg(state.th2).toFixed(1);
+  $('outV1').textContent = (params.L1*state.om1).toFixed(2);     // laju sepanjang busur (+ = ke kanan)
+  $('outV2').textContent = (params.L2*state.om2).toFixed(2);
+  $('outT1').textContent = `${T0(params.L1).toFixed(2)} / ${fm(periodMeas[1])}`;
+  $('outT2').textContent = `${T0(params.L2).toFixed(2)} / ${fm(periodMeas[2])}`;
+  $('outT').textContent = state.t.toFixed(2);
+  $('outColl').textContent = state.collisions;
+  $('outEnergy').textContent = currentEnergyMilliJ().toFixed(2);
+  $('outMomentum').textContent = (momentumX()*1000).toFixed(2);
+  $('outEm').textContent = fm(state.lastE);
+  $('outLost').textContent = (state.lostTotal*1000).toFixed(2);
 }
 
-/* slider bindings */
 function bindSlider(id, dispId, key, fmt){
   const el = document.getElementById(id), disp = document.getElementById(dispId);
   el.addEventListener('input', () => {
     const v = parseFloat(el.value);
     params[key] = (id==='L1'||id==='L2') ? v/100 : v;
     disp.textContent = fmt ? fmt(v) : v;
+    if(!state.running && state.t === 0) resetSim();   // ← baris baru: pratinjau langsung sebelum Mulai
+  });
+}
+function bindAngleSlider(id, dispId, key){
+  const el = document.getElementById(id), disp = document.getElementById(dispId);
+  el.addEventListener('input', () => {
+    const v = parseFloat(el.value);
+    params[key] = v;
+    disp.textContent = v.toFixed(0);
+    if(!state.running) resetSim();
   });
 }
 bindSlider('L1','vL1','L1', v=>v.toFixed(0));
 bindSlider('M1','vM1','M1', v=>v.toFixed(0));
-bindSlider('A1','vA1','A1', v=>v.toFixed(0));
 bindSlider('L2','vL2','L2', v=>v.toFixed(0));
 bindSlider('M2','vM2','M2', v=>v.toFixed(0));
-bindSlider('A2','vA2','A2', v=>v.toFixed(0));
 bindSlider('E','vE','E', v=>v.toFixed(2));
 bindSlider('D','vD','D', v=>v.toFixed(2));
-document.getElementById('G').addEventListener('change', e => params.G = parseFloat(e.target.value));
+bindAngleSlider('A1','vA1','A1');
+bindAngleSlider('A2','vA2','A2');
+
+document.getElementById('G').addEventListener('change', e => { params.G = parseFloat(e.target.value); if(!state.running) resetSim(); });
+document.getElementById('SPEED').addEventListener('change', e => state.speed = parseFloat(e.target.value));
 
 document.getElementById('btnToggle').addEventListener('click', () => {
+  initAudio();
   state.running = !state.running;
   document.getElementById('btnToggle').textContent = state.running ? '⏸ Jeda' : '▶ Mulai';
 });
-document.getElementById('btnReset').addEventListener('click', resetSim);
+document.getElementById('btnReset').addEventListener('click', () => { initAudio(); resetSim(); });
 document.getElementById('btnPush').addEventListener('click', () => {
-  state.om1 += (state.th1<0?-1:1)*1.2;
-  state.om2 += (state.th2<0?-1:1)*1.2;
+  initAudio();
+  // "memompa": tambah kecepatan searah gerak saat ini (jika diam: ke arah luar) → energi bertambah
+  const dir = (om, th) => om !== 0 ? Math.sign(om) : (th < 0 ? -1 : 1);
+  state.om1 += dir(state.om1, state.th1)*1.2;
+  state.om2 += dir(state.om2, state.th2)*1.2;
+});
+document.getElementById('collideOn').addEventListener('change', e => {
+  display.collide = e.target.checked;
+  cross[1] = cross[2] = periodMeas[1] = periodMeas[2] = null;
+  if(!state.running && state.t === 0) resetSim();
 });
 
-/* ------------ GRAPHS ------------ */
-const gThCanvas = document.getElementById('graphTheta'), gThCtx = gThCanvas.getContext('2d');
-const gECanvas = document.getElementById('graphEnergy'), gECtx = gECanvas.getContext('2d');
-
-function drawDualGraph(ctx, canvas, data1, data2, maxAmp, c1, c2){
-  const w = canvas.width, h = canvas.height;
-  ctx.clearRect(0,0,w,h);
-  ctx.strokeStyle = '#2a3145'; ctx.lineWidth = 1;
-  for(let i=0;i<=10;i++){ const gx=i*w/10; ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
-  for(let i=0;i<=4;i++){ const gy=i*h/4; ctx.beginPath(); ctx.moveTo(0,gy); ctx.lineTo(w,gy); ctx.stroke(); }
-  ctx.strokeStyle = '#4a556e'; ctx.lineWidth = 1.2;
-  ctx.beginPath(); ctx.moveTo(0,h/2); ctx.lineTo(w,h/2); ctx.stroke();
-  ctx.fillStyle = '#7c869c'; ctx.font = '11px "Plus Jakarta Sans"';
-  ctx.fillText('+θ', 8, 14); ctx.fillText('−θ', 8, h-6);
-  ctx.fillText('waktu →', w-64, h-6);
-  if(data1.length<2 || maxAmp===0) return;
-  [[data1,c1],[data2,c2]].forEach(([data,color]) => {
-    ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
-    const n = data.length;
-    for(let i=0;i<n;i++){
-      const px = (i/(n-1))*w, py = h/2 - (data[i]/maxAmp)*(h/2*0.9);
-      if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
-    }
-    ctx.stroke();
-  });
+document.getElementById('showVec1').addEventListener('change', e => { display.vec1 = e.target.checked; updateLegend(); });
+document.getElementById('showVec2').addEventListener('change', e => { display.vec2 = e.target.checked; updateLegend(); });
+document.getElementById('soundOn').addEventListener('change', e => {
+  display.sound = e.target.checked;
+  if(display.sound) { initAudio(); playTak(0.4); }
+});
+function updateLegend(){
+  const legend = document.getElementById('vecLegend');
+  if(display.vec1 || display.vec2) legend.classList.add('show');
+  else legend.classList.remove('show');
 }
-function drawSingleGraph(ctx, canvas, data, color){
-  const w = canvas.width, h = canvas.height;
+
+/* --- Grafik (sumbu-x = waktu simulasi, jendela 8 s, garis putus-putus = saat tumbukan) --- */
+const gThCanvas = document.getElementById('graphTheta'), gThCtx = gThCanvas.getContext('2d');
+const gECanvas  = document.getElementById('graphEnergy'), gECtx  = gECanvas.getContext('2d');
+
+function gBase(ctx, c, rows, t0, t1){
+  const w = c.width, h = c.height;
   ctx.clearRect(0,0,w,h);
   ctx.strokeStyle = '#2a3145'; ctx.lineWidth = 1;
-  for(let i=0;i<=10;i++){ const gx=i*w/10; ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,h); ctx.stroke(); }
+  for(let i=0;i<=8;i++){ const x=i*w/8; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let i=0;i<=rows;i++){ const y=i*h/rows; ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(20,184,166,.45)'; ctx.setLineDash([3,4]);
+  state.marks.forEach(t => { if(t < t0) return; const x=(t-t0)/(t1-t0)*w; ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); });
+  ctx.setLineDash([]);
   ctx.fillStyle = '#7c869c'; ctx.font = '11px "Plus Jakarta Sans"';
-  ctx.fillText('E total (mJ)', 8, 14);
-  ctx.fillText('waktu →', w-64, h-6);
-  if(data.length<2) return;
-  const maxVal = Math.max(...data, 0.001);
+  ctx.fillText(`t = ${t0.toFixed(1)} … ${t1.toFixed(1)} s · garis putus-putus = tumbukan`, w-330, h-6);
+}
+function plotLine(ctx, c, key, fy, color, t0, t1){
   ctx.strokeStyle = color; ctx.lineWidth = 2.2; ctx.beginPath();
-  const n = data.length;
-  for(let i=0;i<n;i++){
-    const px = (i/(n-1))*w, py = h - (data[i]/maxVal)*(h*0.88) - 8;
-    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
-  }
+  state.hist.forEach((p,i) => { const x=(p.t-t0)/(t1-t0)*c.width, y=fy(p[key]); i ? ctx.lineTo(x,y) : ctx.moveTo(x,y); });
   ctx.stroke();
 }
+function drawGraphs(){
+  const t1 = Math.max(WINDOW_S, state.t), t0 = t1 - WINDOW_S;
+  // θ(t)
+  let w = gThCanvas.width, h = gThCanvas.height;
+  gBase(gThCtx, gThCanvas, 4, t0, t1);
+  gThCtx.strokeStyle = '#4a556e'; gThCtx.lineWidth = 1.2;
+  gThCtx.beginPath(); gThCtx.moveTo(0,h/2); gThCtx.lineTo(w,h/2); gThCtx.stroke();
+  gThCtx.fillStyle = '#7c869c'; gThCtx.fillText('+θ', 8, 14); gThCtx.fillText('−θ', 8, h-6);
+  const fy = v => h/2 - (v/state.ampMax)*(h/2*0.9);
+  plotLine(gThCtx, gThCanvas, 'a', fy, '#ef4444', t0, t1);
+  plotLine(gThCtx, gThCanvas, 'b', fy, '#f5b301', t0, t1);
+  // Energi mekanik total (skala tetap 0 … E awal → "anak tangga" terlihat jelas)
+  h = gECanvas.height;
+  gBase(gECtx, gECanvas, 4, t0, t1);
+  gECtx.fillStyle = '#7c869c'; gECtx.fillText('E total (mJ)', 8, 14);
+  const emax = Math.max(state.E0, ...state.hist.map(p => p.e), 0.001);
+  plotLine(gECtx, gECanvas, 'e', v => h - (v/emax)*(h*0.88) - 8, '#14b8a6', t0, t1);
+}
 
-/* ------------ P5 SKETCH ------------ */
+/* --- Arrow helper --- */
+function drawArrow(p, x1, y1, x2, y2, color, weight=2.2, label=''){
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx,dy);
+  if(len < 3) return;
+  const ang = Math.atan2(dy, dx);
+  const headLen = Math.min(9, len*0.35);
+  const headSpread = 0.42;
+  p.stroke(color); p.strokeWeight(weight); p.noFill();
+  p.line(x1, y1, x2, y2);
+  const h1x = x2 - headLen*Math.cos(ang - headSpread);
+  const h1y = y2 - headLen*Math.sin(ang - headSpread);
+  const h2x = x2 - headLen*Math.cos(ang + headSpread);
+  const h2y = y2 - headLen*Math.sin(ang + headSpread);
+  p.noStroke(); p.fill(color);
+  p.triangle(x2, y2, h1x, h1y, h2x, h2y);
+  if(label){
+    const lx = x2 + Math.cos(ang)*(9);
+    const ly = y2 + Math.sin(ang)*(9);
+    p.noStroke(); p.fill(color);
+    p.textSize(10); p.textStyle(p.BOLD);
+    p.textAlign(p.CENTER, p.CENTER);
+    p.text(label, lx, ly);
+  }
+}
+
+function drawVectors(p, x, y, theta, omega, L, massKg){
+  const g = params.G;
+  const mg = massKg * g;
+  const T_mag = mg * Math.cos(theta) + massKg * L * omega * omega;
+  const tang_mag = mg * Math.abs(Math.sin(theta));
+  const v_mag = L * Math.abs(omega);
+  const pxPerN = 52 / mg;
+  const pxPerV = 55;
+  const tx = Math.cos(theta), ty = -Math.sin(theta);
+  const sx = -Math.sin(theta), sy = -Math.cos(theta);
+
+  drawArrow(p, x, y, x, y + mg*pxPerN, '#3b82f6', 2.4, 'mg');
+
+  const Tpx = Math.min(T_mag*pxPerN, 110);
+  drawArrow(p, x, y, x + sx*Tpx, y + sy*Tpx, '#ef4444', 2.4, 'T');
+
+  if(tang_mag > 1e-6){
+    const sign = -Math.sign(theta) || 0;
+    const tpx = Math.min(tang_mag*pxPerN, 80);
+    drawArrow(p, x, y, x + sign*tx*tpx, y + sign*ty*tpx, '#f5b301', 2.4, 'mg sinθ');
+  }
+  if(v_mag > 1e-4){
+    const vSign = Math.sign(omega) || 1;
+    const vpx = Math.min(v_mag*pxPerV, 90);
+    drawArrow(p, x, y, x + vSign*tx*vpx, y + vSign*ty*vpx, '#14b8a6', 2.4, 'v');
+  }
+}
+
+/* --- P5 Sketch — canvas besar & pivot diturunkan --- */
 let p5Instance = null;
 function initLab(){
   if(p5Instance) return;
-  const W = 460, H = 380;
-  const pivotX = W/2, pivotY = 46;
-  const pxPerM = 200;
+
+  // Canvas diperbesar dan pivot diturunkan drastis untuk memberi ruang gerak penuh
+  // di atas, bawah, kiri, dan kanan. Cukup untuk bola yang terpental melewati poros.
+  const W = 660, H = 640;
+  const pivotX = W/2;         // 330
+  const pivotY = 250;         // cukup banyak headroom di atas
+  const pxPerM = 160;         // 1 m → 160 px (bola max di y = 250±160 = 90..410)
 
   p5Instance = new p5((p) => {
     p.setup = () => {
@@ -1218,35 +1060,31 @@ function initLab(){
     };
     p.draw = () => {
       if(state.running){
-        const frameDt = Math.min(p.deltaTime/1000, 0.05);
-        const sub = 6, dtSub = frameDt/sub;
-        for(let i=0;i<sub;i++) physicsStep(dtSub);
-        state.histTh1.push(radToDeg(state.th1));
-        state.histTh2.push(radToDeg(state.th2));
-        state.histE.push(currentEnergyMilliJ());
-        if(state.histTh1.length>420){
-          state.histTh1.shift(); state.histTh2.shift(); state.histE.shift();
-        }
-        const maxAmp = Math.max(params.A1, params.A2, 10);
-        drawDualGraph(gThCtx, gThCanvas, state.histTh1, state.histTh2, maxAmp, '#ef4444', '#f5b301');
-        drawSingleGraph(gECtx, gECanvas, state.histE, '#14b8a6');
+        const frameDt = Math.min(p.deltaTime/1000, 0.05) * state.speed;
+        const sub = Math.max(4, Math.ceil(frameDt/0.002)), dtSub = frameDt/sub;
+        for(let i=0;i<sub;i++) stepSim(dtSub);
+        state.ampMax = Math.max(state.ampMax, Math.abs(radToDeg(state.th1)), Math.abs(radToDeg(state.th2)));
+        state.hist.push({ t:state.t, a:radToDeg(state.th1), b:radToDeg(state.th2), e:currentEnergyMilliJ() });
+        while(state.hist.length && state.hist[0].t < state.t - WINDOW_S) state.hist.shift();
+        while(state.marks.length && state.marks[0] < state.t - WINDOW_S) state.marks.shift();
+        drawGraphs();
       }
 
-      // background gradient
+      // Background
       const bg = p.drawingContext.createLinearGradient(0,0,0,H);
       bg.addColorStop(0, '#1a2030');
       bg.addColorStop(1, '#0f131c');
       p.drawingContext.fillStyle = bg;
       p.drawingContext.fillRect(0,0,W,H);
 
-      // ceiling
+      // Ceiling bar
       p.noStroke(); p.fill(56,65,89);
-      p.rect(pivotX-70, pivotY-14, 140, 10, 5);
+      p.rect(pivotX-95, pivotY-14, 190, 10, 5);
 
-      // dashed vertical
+      // Dashed vertical reference (full height minus margins)
       p.stroke(70,79,105); p.strokeWeight(1);
       p.drawingContext.setLineDash([4,5]);
-      p.line(pivotX, pivotY, pivotX, H-14);
+      p.line(pivotX, 20, pivotX, H-14);
       p.drawingContext.setLineDash([]);
 
       const x1 = pivotX + params.L1*Math.sin(state.th1)*pxPerM;
@@ -1254,34 +1092,32 @@ function initLab(){
       const x2 = pivotX + params.L2*Math.sin(state.th2)*pxPerM;
       const y2 = pivotY + params.L2*Math.cos(state.th2)*pxPerM;
 
-      // strings
+      // Strings
       p.stroke(140,150,175); p.strokeWeight(1.6);
       p.line(pivotX, pivotY, x1, y1);
       p.line(pivotX, pivotY, x2, y2);
 
-      const r1px = ballRadiusM(params.M1)*pxPerM;
-      const r2px = ballRadiusM(params.M2)*pxPerM;
+      const r1px = ballRadiusPx(params.M1);
+      const r2px = ballRadiusPx(params.M2);
 
-      // red ball glow + body
+      // Red ball glow + body
       p.noStroke();
-      for(let i=6;i>=0;i--){
-        p.fill(239,68,68, 10);
-        p.circle(x1, y1, (r1px + i*1.1)*2);
-      }
+      for(let i=7;i>=0;i--){ p.fill(239,68,68, 9); p.circle(x1, y1, (r1px + i*1.4)*2); }
       p.fill(239,68,68); p.circle(x1, y1, r1px*2);
-      p.fill(255,200,200, 190); p.circle(x1 - r1px*0.3, y1 - r1px*0.35, r1px*0.5);
+      p.fill(255,200,200, 200); p.circle(x1 - r1px*0.30, y1 - r1px*0.35, r1px*0.55);
 
-      // yellow ball glow + body
-      for(let i=6;i>=0;i--){
-        p.fill(245,179,1, 10);
-        p.circle(x2, y2, (r2px + i*1.1)*2);
-      }
+      // Yellow ball glow + body
+      for(let i=7;i>=0;i--){ p.fill(245,179,1, 9); p.circle(x2, y2, (r2px + i*1.4)*2); }
       p.fill(245,179,1); p.circle(x2, y2, r2px*2);
-      p.fill(255,248,200, 210); p.circle(x2 - r2px*0.3, y2 - r2px*0.35, r2px*0.5);
+      p.fill(255,248,200, 220); p.circle(x2 - r2px*0.30, y2 - r2px*0.35, r2px*0.55);
 
-      // pivot
-      p.fill(20,26,40); p.circle(pivotX, pivotY, 11);
+      // Pivot
+      p.fill(20,26,40); p.circle(pivotX, pivotY, 12);
       p.fill(200,210,230); p.circle(pivotX, pivotY, 5);
+
+      // Vectors
+      if(display.vec1) drawVectors(p, x1, y1, state.th1, state.om1, params.L1, params.M1/1000);
+      if(display.vec2) drawVectors(p, x2, y2, state.th2, state.om2, params.L2, params.M2/1000);
 
       updateReadouts();
     };
@@ -1289,7 +1125,7 @@ function initLab(){
 }
 
 /* ============================================================
-   3. QUIZ
+   4. QUIZ
 ============================================================ */
 const quizData = [
   { q:'Gerak tiap bola lato-lato di antara dua tumbukan paling mendekati gerak...',
@@ -1297,27 +1133,26 @@ const quizData = [
     exp:'Bola tergantung pada tali dan berayun di sekitar titik kesetimbangan — ini gerak bandul, yang mendekati GHS untuk sudut kecil.' },
   { q:'Jika panjang tali (L) diperbesar, apa yang terjadi pada periode ayunan?',
     opts:['Periode mengecil (lebih cepat)','Periode membesar (lebih lambat)','Periode tidak berubah','Bola berhenti bergerak'], correct:1,
-    exp:'T = 2π√(L/g) — semakin panjang tali, semakin besar periodenya, sehingga ayunan menjadi lebih lambat.' },
+    exp:'T = 2π√(L/g) — semakin panjang tali, semakin besar periodenya.' },
   { q:'Pada tumbukan dengan koefisien restitusi e = 1, maka...',
     opts:['Energi kinetik total berkurang drastis','Kedua bola menempel setelah tumbukan','Energi kinetik total tetap (kekal)','Momentum tidak kekal'], correct:2,
-    exp:'e = 1 berarti tumbukan lenting sempurna — energi kinetik total sebelum dan sesudah tumbukan besarnya sama.' },
+    exp:'e = 1 berarti tumbukan lenting sempurna — energi kinetik total kekal.' },
   { q:'Hukum yang SELALU berlaku pada setiap jenis tumbukan adalah...',
     opts:['Kekekalan energi kinetik','Kekekalan momentum','Kekekalan periode','Kekekalan sudut'], correct:1,
-    exp:'Hukum kekekalan momentum berlaku pada semua jenis tumbukan. Kekekalan energi kinetik hanya berlaku pada tumbukan lenting sempurna (e=1).' },
+    exp:'Hukum kekekalan momentum berlaku pada semua jenis tumbukan.' },
   { q:'Suara "tek-tek" pada lato-lato menandakan bahwa tumbukannya...',
     opts:['Lenting sempurna (e=1)','Tidak lenting sama sekali (e=0)','Lenting sebagian (0<e<1)','Tidak terjadi tumbukan'], correct:2,
-    exp:'Bunyi yang dihasilkan adalah tanda adanya energi yang berubah bentuk (menjadi bunyi dan panas) — ciri tumbukan lenting sebagian.' },
+    exp:'Bunyi menandakan sebagian energi berubah menjadi bunyi dan panas — ciri tumbukan lenting sebagian.' },
   { q:'Jika massa bola merah dibuat jauh lebih besar dari bola kuning, setelah tumbukan...',
     opts:['Bola merah terpental jauh lebih kencang','Bola kuning terpental dengan kecepatan jauh lebih besar','Keduanya berhenti total','Massa tidak memengaruhi hasil tumbukan'], correct:1,
-    exp:'Sesuai hukum kekekalan momentum, benda bermassa kecil yang ditumbuk benda jauh lebih besar akan terpental dengan kecepatan jauh lebih tinggi.' },
+    exp:'Sesuai kekekalan momentum, benda bermassa kecil yang ditumbuk benda jauh lebih besar akan terpental dengan kecepatan jauh lebih tinggi.' },
   { q:'Mengapa pada sudut awal besar (mis. 70°), periode ayunan menyimpang dari T = 2π√(L/g)?',
     opts:['Karena rumus hanya berlaku untuk sudut kecil (pendekatan sin θ ≈ θ)','Karena gravitasi berubah','Karena tali memanjang','Karena massa bola berubah'], correct:0,
-    exp:'Rumus GHS diturunkan dengan pendekatan sin θ ≈ θ, yang hanya akurat untuk sudut kecil. Pada sudut besar pendekatan ini meleset.' },
+    exp:'Rumus GHS diturunkan dengan pendekatan sin θ ≈ θ, hanya akurat untuk sudut kecil.' },
   { q:'Jika redaman udara dan e < 1 terus bekerja tanpa dorongan tambahan, amplitudo akan...',
     opts:['Terus membesar','Tetap konstan selamanya','Berangsur mengecil hingga berhenti','Langsung menjadi nol seketika'], correct:2,
-    exp:'Setiap tumbukan dengan e<1 dan redaman udara menghilangkan sedikit energi, sehingga amplitudo berangsur mengecil.' }
+    exp:'Setiap tumbukan dengan e<1 dan redaman udara menghilangkan sedikit energi.' }
 ];
-
 function renderQuiz(){
   const c = document.getElementById('quizContainer');
   c.innerHTML = '';
@@ -1348,7 +1183,7 @@ function renderQuiz(){
 renderQuiz();
 
 /* ============================================================
-   4. LKPD GENERATOR
+   5. LKPD
 ============================================================ */
 const el = id => document.getElementById(id);
 const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -1364,7 +1199,6 @@ function buildLKPD(){
   const tgl = el('fTanggal').value
     ? new Date(el('fTanggal').value).toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'})
     : '..............................';
-
   let html = '';
 
   if(el('cIdentitas').checked){
@@ -1381,45 +1215,42 @@ function buildLKPD(){
         </table>
       </div>`;
   }
-
   if(el('cTujuan').checked){
     html += `<h2>A. Tujuan Pembelajaran</h2><ol>`;
     el('fTujuan').value.split('\n').filter(l=>l.trim()).forEach(l => html += `<li>${esc(l)}</li>`);
     html += `</ol>`;
   }
-
   if(el('cAlat').checked){
     html += `<h2>B. Alat &amp; Bahan</h2><ul>`;
     el('fAlat').value.split('\n').filter(l=>l.trim()).forEach(l => html += `<li>${esc(l)}</li>`);
     html += `</ul>`;
   }
-
   if(el('cTeori').checked){
     html += `<h2>C. Landasan Teori Singkat</h2>
       <p>Gerak bandul sederhana memenuhi persamaan diferensial:</p>
       <p style="text-align:center;font-style:italic;">d²θ/dt² = −(g/L) · sin θ</p>
       <p>Untuk sudut kecil (θ &lt; ±15°), berlaku sin θ ≈ θ sehingga gerak mendekati <b>Getaran Harmonik Sederhana (GHS)</b> dengan periode:</p>
       <p style="text-align:center;font-style:italic;">T = 2π √(L/g)</p>
-      <p>Saat kedua bola bertumbukan di titik terendah, berlaku <b>hukum kekekalan momentum</b>:</p>
+      <p>Saat kedua bola bertumbukan (di sekitar titik terendah), berlaku <b>hukum kekekalan momentum</b>:</p>
       <p style="text-align:center;font-style:italic;">m₁ v₁ + m₂ v₂ = m₁ v₁′ + m₂ v₂′</p>
       <p>dan <b>koefisien restitusi</b>:</p>
       <p style="text-align:center;font-style:italic;">e = − (v₂′ − v₁′) / (v₂ − v₁)</p>
       <p>Nilai e menentukan jenis tumbukan: e = 1 (lenting sempurna), 0 &lt; e &lt; 1 (lenting sebagian), e = 0 (tidak lenting).</p>`;
   }
-
   if(el('cLangkah').checked){
     html += `<h2>D. Langkah Kerja</h2>
       <ol>
         <li>Bukalah aplikasi <i>Virtual Lab Lato-Lato</i> pada perangkatmu.</li>
         <li>Atur parameter sesuai variasi yang diminta pada tabel pengamatan.</li>
-        <li>Klik tombol <b>Reset</b> agar perubahan sudut awal diterapkan, lalu klik <b>Mulai</b>.</li>
-        <li>Amati gerak kedua bola dan perhatikan grafik θ(t) serta grafik energi mekanik total.</li>
+        <li>Aktifkan opsi <b>Tampilkan Vektor</b> untuk melihat arah mg, T, mg sin θ, dan v.</li>
+        <li>Aktifkan mode <b>slow motion</b> (0.25× atau 0.5×) jika ingin mengamati tumbukan secara rinci.</li>
+        <li>Klik tombol <b>Reset</b> lalu klik <b>Mulai</b>. Dengarkan bunyi tumbukan yang dihasilkan.</li>
+        <li>Amati gerak kedua bola, grafik θ(t), dan grafik energi mekanik total.</li>
         <li>Catat jumlah tumbukan, energi mekanik awal, dan energi mekanik setelah 5 detik.</li>
-        <li>Ulangi langkah 2–5 untuk setiap variasi.</li>
+        <li>Ulangi langkah 2–7 untuk setiap variasi.</li>
         <li>Jawab pertanyaan analisis dan tuliskan kesimpulanmu.</li>
       </ol>`;
   }
-
   if(el('cTabel').checked){
     html += `<h2>E. Tabel Data Pengamatan</h2>
       <table>
@@ -1433,75 +1264,64 @@ function buildLKPD(){
     html += `</tbody></table>
       <p style="font-size:10.5pt;font-style:italic;color:#555;">Catatan: isi kolom L, m, θ₀, dan e sesuai variasi yang kamu pilih, lalu catat hasil pengamatanmu pada kolom berikutnya.</p>`;
   }
-
   if(el('cAnalisis').checked){
     html += `<h2>F. Pertanyaan Analisis</h2>
       <ol>
         <li>Bandingkan periode ayunan ketika L = 10 cm dan L = 40 cm. Apakah hasilnya sesuai dengan rumus T = 2π√(L/g)? Jelaskan!</li>
         <li>Aturlah sudut awal θ₀ = 10° dan θ₀ = 70°. Apakah periodenya sama? Mengapa demikian? Kaitkan dengan batas berlakunya pendekatan GHS.</li>
+        <li>Aktifkan tampilan vektor. Amati panjang panah mg, T, dan mg sin θ saat bola di titik tertinggi (θ = θ₀) dan di titik terendah (θ = 0). Kapan T paling besar? Mengapa?</li>
         <li>Bandingkan jumlah tumbukan sebelum bola berhenti untuk e = 1 dan e = 0,5. Apa kesimpulanmu?</li>
         <li>Perhatikan grafik energi mekanik total. Mengapa grafiknya berbentuk "anak tangga" ketika e &lt; 1?</li>
+        <li>Dengarkan bunyi tumbukan saat e = 0,9 dan e = 0,5. Apakah volumenya berbeda? Kaitkan dengan besar energi yang hilang tiap tumbukan.</li>
         <li>Jika massa bola merah diubah menjadi 100 g dan bola kuning tetap 25 g, bagaimana gerak keduanya setelah tumbukan? Jelaskan berdasarkan hukum kekekalan momentum.</li>
-        <li>Jelaskan mengapa lato-lato yang dibiarkan berayun tanpa dipompa akhirnya berhenti berbunyi. Kaitkan dengan konsep energi.</li>
       </ol>
       <p><b>Jawaban:</b></p>
       <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>`;
   }
-
   if(el('cKesimpulan').checked){
     html += `<h2>G. Kesimpulan</h2>
       <p>Tuliskan kesimpulan yang kamu peroleh dari kegiatan ini (minimal 3 poin):</p>
       <p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p><p>&nbsp;</p>`;
   }
-
   if(el('cTtd').checked){
     html += `<div class="ttd">
       <div>Mengetahui,<br>Guru Mata Pelajaran<div class="line">${esc(guru)}</div></div>
       <div>${esc(tgl)}<br>Siswa<div class="line">${esc(nama)}</div></div>
     </div>`;
   }
-
   return html;
 }
-
-function refreshPreview(){
-  el('lkpdPreview').innerHTML = buildLKPD();
-}
-
+function refreshPreview(){ el('lkpdPreview').innerHTML = buildLKPD(); }
 ['fJudul','fSekolah','fMapel','fKelas','fNama','fTanggal','fGuru','fWaktu','fTujuan','fAlat'].forEach(id => {
   const e = el(id); if(e) e.addEventListener('input', refreshPreview);
 });
 ['cIdentitas','cTujuan','cAlat','cTeori','cLangkah','cTabel','cAnalisis','cKesimpulan','cTtd'].forEach(id => {
   const e = el(id); if(e) e.addEventListener('change', refreshPreview);
 });
-if(el('fTanggal') && !el('fTanggal').value){
-  el('fTanggal').value = new Date().toISOString().slice(0,10);
-}
+if(el('fTanggal') && !el('fTanggal').value) el('fTanggal').value = new Date().toISOString().slice(0,10);
 refreshPreview();
 
-/* ------------ DOWNLOAD WORD ------------ */
 function downloadWord(){
   const content = buildLKPD();
-  const styles = `
-    <style>
-      @page { size: A4; margin: 2cm; }
-      body { font-family: 'Times New Roman', serif; font-size: 12pt; color: #000; line-height: 1.5; }
-      h1 { font-size: 15pt; text-align: center; margin: 0 0 4pt; }
-      h2 { font-size: 12.5pt; margin: 14pt 0 4pt; border-bottom: 1pt solid #333; padding-bottom: 2pt; }
-      p { font-size: 11.5pt; margin: 5pt 0; text-align: justify; }
-      ol, ul { font-size: 11.5pt; margin: 4pt 0 4pt 20pt; }
-      li { margin: 2pt 0; }
-      table { border-collapse: collapse; width: 100%; margin: 6pt 0; }
-      th, td { border: 1pt solid #333; padding: 5pt 7pt; font-size: 11pt; vertical-align: top; }
-      th { background: #e8e8e8; font-weight: bold; text-align: center; }
-      .identitas { border: 1.5pt solid #333; padding: 8pt; margin: 8pt 0; }
-      .identitas table { border-collapse: collapse; }
-      .identitas td { border: none; padding: 2pt 6pt; }
-      .identitas td:first-child { width: 120pt; font-weight: bold; }
-      .ttd { margin-top: 28pt; }
-      .ttd > div { display: inline-block; width: 45%; text-align: center; vertical-align: top; }
-      .ttd .line { margin-top: 60pt; border-top: 1pt solid #333; padding-top: 3pt; }
-    </style>`;
+  const styles = `<style>
+    @page { size: A4; margin: 2cm; }
+    body { font-family: 'Times New Roman', serif; font-size: 12pt; color: #000; line-height: 1.5; }
+    h1 { font-size: 15pt; text-align: center; margin: 0 0 4pt; }
+    h2 { font-size: 12.5pt; margin: 14pt 0 4pt; border-bottom: 1pt solid #333; padding-bottom: 2pt; }
+    p { font-size: 11.5pt; margin: 5pt 0; text-align: justify; }
+    ol, ul { font-size: 11.5pt; margin: 4pt 0 4pt 20pt; }
+    li { margin: 2pt 0; }
+    table { border-collapse: collapse; width: 100%; margin: 6pt 0; }
+    th, td { border: 1pt solid #333; padding: 5pt 7pt; font-size: 11pt; vertical-align: top; }
+    th { background: #e8e8e8; font-weight: bold; text-align: center; }
+    .identitas { border: 1.5pt solid #333; padding: 8pt; margin: 8pt 0; }
+    .identitas table { border-collapse: collapse; }
+    .identitas td { border: none; padding: 2pt 6pt; }
+    .identitas td:first-child { width: 120pt; font-weight: bold; }
+    .ttd { margin-top: 28pt; }
+    .ttd > div { display: inline-block; width: 45%; text-align: center; vertical-align: top; }
+    .ttd .line { margin-top: 60pt; border-top: 1pt solid #333; padding-top: 3pt; }
+  </style>`;
   const html = `<html xmlns:o='urn:schemas-microsoft-com:office:office'
     xmlns:w='urn:schemas-microsoft-com:office:word'
     xmlns='http://www.w3.org/TR/REC-html40'>
@@ -1518,8 +1338,6 @@ function downloadWord(){
     setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove();}, 200);
   }
 }
-
-/* ------------ DOWNLOAD PDF ------------ */
 function downloadPDF(){
   const src = el('lkpdPreview');
   html2pdf().set({
@@ -1533,7 +1351,7 @@ function downloadPDF(){
 }
 
 /* ============================================================
-   5. INIT
+   6. INIT
 ============================================================ */
 resetSim();
 if(window.MathJax && MathJax.startup && MathJax.startup.promise){
